@@ -52,4 +52,4 @@ Pushes to `main` that modify thesis sources build the document automatically and
 
 ### Versioned releases
 
-Every push to `main` that changes thesis sources creates a GitHub Release automatically. The release is tied to the immutable commit and contains a PDF named `thesis-<short-commit-sha>.pdf`. Changes to `.tex`, `.sty`, `.bib`, `assets/`, or the `Makefile` trigger a new versioned release.
+Every push to `main` that changes thesis sources creates a GitHub Release automatically. Releases use patch versions (`thesis v0.0.1`, then `thesis v0.0.2`, and so on) and contain a matching PDF such as `thesis-v0.0.1.pdf`. Changes to `.tex`, `.sty`, `.bib`, `assets/`, or the `Makefile` trigger a new versioned release.
