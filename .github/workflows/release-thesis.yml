@@ -42,9 +42,11 @@ jobs:
           if [ -z "$latest_tag" ]; then
             version="v0.0.1"
           else
-            IFS=. read -r major minor patch <<EOF
-            ${latest_tag#thesis-v}
-            EOF
+            numeric_version="${latest_tag#thesis-v}"
+            major="${numeric_version%%.*}"
+            remainder="${numeric_version#*.}"
+            minor="${remainder%%.*}"
+            patch="${remainder#*.}"
             version="v${major}.${minor}.$((patch + 1))"
           fi
 
