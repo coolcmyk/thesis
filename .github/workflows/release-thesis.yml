@@ -1,35 +1,46 @@
 name: Release versioned thesis PDF
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+    paths:
+      - '**/*.tex'
+      - '**/*.sty'
+      - '**/*.bib'
+      - 'assets/**'
+      - 'Makefile'
+      - '.github/workflows/release-thesis.yml'
 
 permissions:
   contents: write
 
 jobs:
-  build-and-upload:
+  build-and-release:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/xu-cheng/texlive-full:latest
 
     steps:
-      - name: Check out the release tag
+      - name: Check out the edited thesis
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.release.tag_name }}
 
       - name: Build thesis PDF
         run: make
 
-      - name: Name the PDF for this release
+      - name: Set release version
+        id: version
         run: |
-          version="${GITHUB_REF_NAME//\//-}"
-          cp out/thesis.pdf "out/thesis-${version}.pdf"
+          echo "tag=thesis-$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Attach PDF to the GitHub release
+      - name: Name the versioned PDF
+        run: cp out/thesis.pdf "out/${{ steps.version.outputs.tag }}.pdf"
+
+      - name: Create GitHub Release and attach PDF
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.release.tag_name }}
-          files: out/thesis-*.pdf
+          tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: Thesis ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          files: out/${{ steps.version.outputs.tag }}.pdf
           fail_on_unmatched_files: true

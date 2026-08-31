@@ -52,12 +52,4 @@ Pushes and pull requests build the document automatically. Download the `thesis-
 
 ### Versioned releases
 
-To publish an immutable, versioned PDF, tag the thesis commit and create a GitHub Release from that tag:
-
-```sh
-git tag -a v1.0.0 -m "Thesis v1.0.0"
-git push origin v1.0.0
-gh release create v1.0.0 --title "Thesis v1.0.0" --generate-notes
-```
-
-When the release is published, the release workflow checks out that exact tag, builds the document, and attaches `thesis-v1.0.0.pdf` to the release. Create a new tag and release whenever you want to publish a newly edited version.
+Every push to `main` that changes thesis sources creates a GitHub Release automatically. The release is tied to the immutable commit and contains a PDF named `thesis-<short-commit-sha>.pdf`. Changes to `.tex`, `.sty`, `.bib`, `assets/`, or the `Makefile` trigger a new versioned release.
