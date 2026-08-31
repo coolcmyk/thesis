@@ -48,7 +48,7 @@ make clean        # remove all build output, including out/
 
 ### GitHub Actions
 
-Pushes and pull requests build the document automatically. Download the `thesis-pdf` artifact from the workflow run to retrieve `out/thesis.pdf`.
+Pushes to `main` that modify thesis sources build the document automatically and publish the resulting PDF to a GitHub Release.
 
 ### Versioned releases
 

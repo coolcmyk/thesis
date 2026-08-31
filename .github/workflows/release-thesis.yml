@@ -29,8 +29,10 @@ jobs:
 
       - name: Set release version
         id: version
+        env:
+          SHA: ${{ github.sha }}
         run: |
-          echo "tag=thesis-$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
+          echo "tag=thesis-$(printf '%.12s' "$SHA")" >> "$GITHUB_OUTPUT"
 
       - name: Name the versioned PDF
         run: cp out/thesis.pdf "out/${{ steps.version.outputs.tag }}.pdf"
