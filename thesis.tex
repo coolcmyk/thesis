@@ -1,0 +1,185 @@
+%
+% Template Laporan Skripsi/Thesis 
+%
+% @author  Andreas Febrian, Lia Sadita 
+% @version 1.03
+%
+% Dokumen ini dibuat berdasarkan standar IEEE dalam membuat class untuk 
+% LaTeX dan konfigurasi LaTeX yang digunakan Fahrurrozi Rahman ketika 
+% membuat laporan skripsi. Konfigurasi yang lama telah disesuaikan dengan 
+% aturan penulisan thesis yang dikeluarkan UI pada tahun 2008.
+%
+
+%
+% Tipe dokumen adalah report dengan satu kolom. 
+%
+\documentclass[12pt, a4paper, onecolumn, oneside, final]{report}
+
+% Load konfigurasi LaTeX untuk tipe laporan thesis
+\usepackage{_internals/uithesis}
+\usepackage{_internals/tikz-uml}
+
+% Daftar pemenggalan suku kata dan istilah dalam LaTeX
+\input{_internals/hype.indonesia}
+
+% Load konfigurasi khusus untuk laporan yang sedang dibuat
+\input{settings}
+% Daftar istilah yang mungkin perlu ditandai 
+\input{istilah}
+
+% Awal bagian penulisan laporan
+\begin{document}
+%
+% Sampul Laporan
+\input{_internals/sampul}
+
+%
+% Gunakan penomeran romawi
+\pagenumbering{roman}
+
+%
+% load halaman judul dalam
+\addChapter{HALAMAN JUDUL}
+\input{_internals/judul_dalam}
+
+%
+% setelah bagian ini, halaman dihitung sebagai halaman ke 2
+\setcounter{page}{2}
+
+% load halaman orisinalitas 
+\chapter*{HALAMAN PERNYATAAN ORISINALITAS}
+\thispagestyle{frontmatterNoFooter}
+\addcontentsline{toc}{chapter}{HALAMAN PERNYATAAN ORISINALITAS} % masuk daftar isi
+\input{src/00-front_matter/02-orisinalitas}
+%
+%
+% load halaman orisinalitas 
+\chapter*{HALAMAN PERNYATAAN PENGGUNAAN KECERDASAN ARTIFISIAL}
+\thispagestyle{frontmatterNoFooter}
+\addcontentsline{toc}{chapter}{HALAMAN PERNYATAAN PENGGUNAAN KECERDASAN ARTIFISIAL} % masuk daftar isi
+\input{src/00-front_matter/02-penggunaan AI}
+%
+%
+\chapter*{HALAMAN PENGESAHAN}
+\thispagestyle{frontmatterNoFooter}
+\addcontentsline{toc}{chapter}{HALAMAN PENGESAHAN} % masuk daftar isi
+\input{src/00-front_matter/03-pengesahan_sidang}
+%
+%
+\chapter*{\kataPengantar}
+\thispagestyle{frontmatterNoFooter}
+\addcontentsline{toc}{chapter}{\kataPengantar} % masuk daftar isi
+\input{src/00-front_matter/04-pengantar}
+%
+%
+\setstretch{1}
+\chapter*{Halaman Pernyataan Persetujuan Publikasi Tugas Akhir untuk Kepentingan Akademis}
+\thispagestyle{frontmatterNoFooter}
+\addcontentsline{toc}{chapter}{HALAMAN PERNYATAAN  PERSETUJUAN PUBLIKASI} % masuk daftar isi
+\input{src/00-front_matter/05-persetujuan_publikasi}
+%
+% 
+\fancypagestyle{abstrakstyle}{
+    \fancyhf{} % bersihkan header/footer default
+    \fancyfoot[R]{\fontsize{10}{12}\selectfont \sffamily \textbf{Universitas Indonesia}}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
+
+\chapter*{ABSTRAK} % judul halaman
+\addcontentsline{toc}{chapter}{ABSTRAK} % masuk daftar isi
+\thispagestyle{abstrakstyle} % pastikan footer diterapkan
+\input{src/00-front_matter/06-abstrak}
+%
+%
+\chapter*{ABSTRACT} % judul halaman
+\addcontentsline{toc}{chapter}{ABSTRACT} % masuk daftar isi
+\thispagestyle{abstrakstyle} % pastikan footer diterapkan
+\input{src/00-front_matter/07-abstract}
+
+%
+% Daftar isi, gambar, dan tabel
+%
+\phantomsection
+\begingroup
+\singlespacing
+% --- Aktifkan footer mulai dari sini ---
+% Frontmatter style (plain)
+\pagestyle{plain}  % Untuk seluruh frontmatter
+\tableofcontents
+\clearpage
+\phantomsection
+\listoftables
+\clearpage
+\phantomsection
+\listoffigures
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{DAFTAR PERSAMAAN}
+\listofequs
+\clearpage
+\phantomsection
+\input{src/00-front_matter/daftar-notasi}%Jika diperlukan
+\clearpage
+%\phantomsection
+%\addcontentsline{toc}{chapter}{DAFTAR ISTILAH}
+%\printnomenclature%Jika diperlukan
+%\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{\listlistingname}
+\listoflistings%Jika diperlukan
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{\listabbreviationname}
+%\listofabbreviation%Jika diperlukan
+%\printacronyms
+\chapter*{DAFTAR SINGKATAN}
+\input{singkatan}
+
+
+\clearpage
+\endgroup
+
+%
+% Gunakan penomeran Arab (1, 2, 3, ...) setelah bagian ini.
+%
+\pagenumbering{arabic}
+
+%
+%
+%
+% Setelah cover, kata pengantar, abstrak, Daftar Isi
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage} % nomor halaman kanan atas
+\fancyfoot[R]{\fontsize{10}{12}\selectfont \sffamily \textbf{Universitas Indonesia}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\setstretch{1.5} % <-- double spacing
+\setlength{\parindent}{1.5em}
+
+\input{src/01-body/01-bab1}
+\input{src/01-body/02-bab2}
+\input{src/01-body/03-bab3}
+\input{src/01-body/04-bab4}
+\input{src/01-body/05-bab5}
+
+%
+% Daftar Pustaka
+%\input{pustaka}
+
+% Alternatif manajemen daftar pustaka dengan \bibliography
+\bibliographystyle{IEEEtran}
+\bibliography{pustaka}
+
+%
+% Lampiran 
+%
+% \begin{appendix}
+% 	\input{_internals/markLampiran}
+% 	\setcounter{page}{2}\textbf{}
+% 	\input{src/99-back_matter/lampiran}
+% \end{appendix}
+
+\end{document}

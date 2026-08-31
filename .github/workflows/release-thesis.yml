@@ -1,0 +1,35 @@
+name: Release versioned thesis PDF
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/xu-cheng/texlive-full:latest
+
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Build thesis PDF
+        run: make
+
+      - name: Name the PDF for this release
+        run: |
+          version="${GITHUB_REF_NAME//\//-}"
+          cp out/thesis.pdf "out/thesis-${version}.pdf"
+
+      - name: Attach PDF to the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: out/thesis-*.pdf
+          fail_on_unmatched_files: true

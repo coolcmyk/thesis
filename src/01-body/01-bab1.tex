@@ -1,0 +1,117 @@
+%-----------------------------------------------------------------------------%
+\chapter{\babSatu}
+%-----------------------------------------------------------------------------%
+Bab ini meletakkan fondasi bagi proyek penelitian dan pengembangan solusi terpadu untuk pengelolaan dan penulisan \ac{TA} mahasiswa \ac{UI}, meliputi sistem D'Office serta templat penulisan berbasis \LaTeX{}\citep{latex_vs_word} dan Microsoft Words\citep{microsoft_word}. 
+Bab ini diawali dengan pemaparan Latar Belakang (seksi~\ref{sec:latar_belakang}) yang mengidentifikasi tantangan dalam proses administrasi dan kepatuhan format penulisan TA. 
+Dari sini, bab ini mengerucut pada Rumusan Masalah (seksi~\ref{sec:rumusan_masalah}) dan Tujuan Penelitian (seksi~\ref{sec:tujuan_penelitian}) yang dirancang untuk menjawab permasalahan tersebut. 
+Selanjutnya, Manfaat Penelitian (seksi~\ref{sec:manfaat_penelitian}) dan Ruang Lingkup Penelitian (seksi~\ref{sec:ruang_lingkup}) dijelaskan untuk menegaskan kontribusi dan batasan proyek. 
+Bab ini diakhiri dengan Sistematika Penulisan (seksi~\ref{sec:sistematika}) sebagai peta jalan bagi pembaca untuk menavigasi struktur laporan.
+
+%-----------------------------------------------------------------------------%
+\section{Latar Belakang}
+\label{sec:latar_belakang}
+%-----------------------------------------------------------------------------%
+Penyusunan \ac{TA} merupakan tahapan krusial dan puncak dari perjalanan akademik seorang mahasiswa di \ac{PSTK UI}. 
+Sebagai karya ilmiah yang menjadi syarat kelulusan, \ac{TA} tidak hanya menuntut penguasaan substansi keilmuan yang mendalam, tetapi juga kepatuhan terhadap prosedur administrasi yang ketat dan kaidah penulisan yang baku. 
+Kualitas sebuah \ac{TA} dinilai dari dua aspek fundamental tersebut: kedalaman riset dan ketepatan administrasi serta format.
+
+Namun, proses pengelolaan \ac{TA} di lingkungan \ac{PSTK UI} saat ini masih berjalan secara semi-manual dan terdesentralisasi. 
+Mahasiswa harus menavigasi serangkaian prosedur yang kompleks dan seringkali tumpang tindih antar sistem, mulai dari pendaftaran \ac{SKS} \ac{TA} di \ac{SIAK-NG} universitas, pengajuan judul, pencarian dosen pembimbing, bimbingan rutin, pendaftaran sidang, hingga proses pengumpulan berkas akhir untuk keperluan Yudisium. 
+Proses ini sangat bergantung pada komunikasi via surel, pengumpulan dokumen fisik, dan pelacakan mandiri oleh mahasiswa. 
+Berdasarkan survei pendahuluan internal, ditemukan bahwa sekitar 80\% responden merasa kesulitan melacak progres administrasi mereka dan sering kali kebingungan mengenai tahapan selanjutnya \citep{TimKurikulumDTK:2024}. Kondisi ini berpotensi menyebabkan keterlambatan, kesalahan administrasi, dan menambah beban non-akademik yang tidak perlu bagi mahasiswa dan dosen.
+
+Di samping tantangan prosedural, masalah konsistensi format penulisan juga menjadi kendala signifikan. Meskipun Universitas Indonesia telah menyediakan Pedoman Penulisan \ac{TA} melalui Keputusan Rektor UI Nomor: 2143/SK/R/UI/2017\citep{SKRektorUI:2017}, implementasinya di tingkat mahasiswa masih belum optimal. Pedoman yang bersifat statis dalam bentuk \ac{PDF} menuntut mahasiswa untuk menafsirkan dan menerapkannya secara manual. Analisis internal terhadap draf \ac{TA} yang dikumpulkan pada semester sebelumnya menunjukkan bahwa rata-rata setiap draf memerlukan 2-3 kali iterasi revisi hanya untuk memperbaiki kesalahan format, seperti tata letak, sitasi, dan penomoran, sebelum dosen dapat fokus pada evaluasi substansi penelitian \citep{Prasetyo:2025}. Hal ini menunjukkan inefisiensi yang jelas dalam proses bimbingan.
+
+Melihat adanya tantangan ganda---inefisiensi proses administrasi dan kesulitan dalam menjaga konsistensi format---maka terdapat sebuah kesenjangan yang jelas. Oleh karena itu, penelitian ini berfokus pada rancang bangun sebuah solusi terpadu yang terdiri dari dua komponen utama: (1) sebuah sistem pengelolaan tugas akhir berbasis web yang selanjutnya diberi nama D'Office, dan (2) sebuah templat penulisan tugas akhir berbasis \LaTeX{} dan \textit{Microsoft Words} yang dirancang untuk mengimplementasikan pedoman resmi universitas. Solusi ganda ini bertujuan untuk menyederhanakan alur kerja, memusatkan informasi, dan memastikan kepatuhan format, yang pada akhirnya diharapkan dapat meningkatkan efisiensi dan kualitas pengalaman penyusunan \ac{TA} secara keseluruhan.
+
+
+%-----------------------------------------------------------------------------%
+\section{Rumusan Masalah}
+\label{sec:rumusan_masalah}
+%-----------------------------------------------------------------------------%
+Berdasarkan latar belakang yang telah diuraikan, permasalahan yang dihadapi mahasiswa \ac{PSTK UI} dalam proses pengerjaan Tugas Akhir dapat dirumuskan sebagai berikut:
+\begin{enumerate}
+    \item Bagaimana merancang dan membangun sebuah sistem pengelolaan \ac{TA} berbasis web yang dapat mengintegrasikan dan menyederhanakan alur kerja administrasi yang kompleks---mulai dari pengajuan judul, pencatatan bimbingan, hingga pendaftaran sidang---yang saat ini masih berjalan secara manual dan terdesentralisasi?
+    
+    \item Bagaimana mengevaluasi efektivitas sistem yang baru dikembangkan dalam meningkatkan efisiensi proses administrasi dan mengurangi beban kerja non-akademik mahasiswa, jika dibandingkan dengan alur kerja manual yang digunakan sebelumnya?
+    
+    \item Sejauh mana sistem yang dilengkapi dengan panduan dan templat terintegrasi dapat meningkatkan akurasi dan konsistensi format penulisan Tugas Akhir mahasiswa, serta mengurangi waktu yang dihabiskan untuk revisi non-substantif?
+
+    \item Bagaimana kualitas \ac{UI/UX} pengguna dari sistem D'Office jika dinilai menggunakan prinsip-prinsip desain dan heuristik kebergunaan?
+\end{enumerate}
+
+%-----------------------------------------------------------------------------%
+\section{Tujuan Penelitian}
+\label{sec:tujuan_penelitian}
+%-----------------------------------------------------------------------------%
+Selaras dengan rumusan masalah yang telah dipaparkan, tujuan dari penelitian ini adalah sebagai berikut:
+\begin{enumerate}
+    \item Merancang dan membangun sebuah purwarupa (\textit{prototype}) fungsional sistem pengelolaan tugas akhir berbasis web untuk mahasiswa Teknik Komputer Universitas Indonesia, yang mencakup modul untuk pengajuan judul, progres bimbingan, pendaftaran sidang, dan pengelolaan dokumen.
+    
+    \item Melakukan evaluasi kuantitatif untuk mengukur peningkatan efisiensi sistem baru dibandingkan dengan sistem manual sebelumnya, dengan fokus pada metrik seperti waktu penyelesaian tahapan administrasi dan jumlah kesalahan prosedural.
+    
+    \item Menganalisis tingkat kepatuhan format penulisan pada draf \ac{TA} yang disusun dengan bantuan sistem baru dengan draf yang disusun tanpanya, untuk memverifikasi dampak sistem terhadap kualitas format dan efisiensi proses revisi.
+
+    \item Melakukan analisis kualitatif terhadap desain antarmuka dan pengalaman pengguna (UI/UX) pada halaman-halaman utama sistem D'Office untuk mengidentifikasi kekuatan desain dan potensi area perbaikan.
+\end{enumerate}
+
+%-----------------------------------------------------------------------------%
+\section{Manfaat Penelitian}
+\label{sec:manfaat_penelitian}
+%-----------------------------------------------------------------------------%
+Berdasarkan latar belakang, rumusan masalah, dan tujuan penelitian yang telah diuraikan, penelitian ini diharapkan memberikan manfaat sebagai berikut:
+
+\begin{enumerate}
+    \item \textbf{Bagi Mahasiswa dan Komunitas Akademik:} \\
+    Penelitian ini menyediakan templat penulisan tugas akhir (skripsi/tesis) yang terstandar dalam format \LaTeX{} dan \textit{Microsoft Word}. Manfaat utamanya adalah memungkinkan mahasiswa untuk lebih memfokuskan energi pada kualitas substansi penelitian, bukan pada teknis pemformatan. Secara lebih luas, model sistem dan metode evaluasi yang diusulkan dapat menjadi referensi bagi peneliti di bidang sistem informasi akademik.
+
+    \item \textbf{Bagi Institusi (Universitas dan Fakultas):} \\
+    Sistem "D'Office" yang dikembangkan memberikan manfaat praktis dan administratif dengan memusatkan dan mengotomatisasi seluruh alur kerja tugas akhir---mulai dari pengajuan judul, pencatatan bimbingan, hingga pendaftaran sidang. Hal ini secara langsung meningkatkan efisiensi operasional, mengurangi beban kerja administratif, dan meminimalkan kesalahan prosedural yang dapat menghambat kelancaran studi mahasiswa.
+
+    \item \textbf{Bagi Pengembangan di Masa Depan:} \\
+    Penelitian ini menghasilkan data evaluasi kuantitatif dan kualitatif mengenai efektivitas sistem dan pengalaman pengguna (UI/UX). Data tersebut menjadi landasan faktual untuk iterasi dan pengembangan sistem lebih lanjut, serta dapat dijadikan model acuan (\textit{benchmark}) bagi fakultas atau universitas lain yang hendak mengimplementasikan solusi serupa.
+\end{enumerate}
+
+%-----------------------------------------------------------------------------%
+\section{Ruang Lingkup Penelitian}
+\label{sec:ruang_lingkup}
+%-----------------------------------------------------------------------------%
+Pengembangan dan evaluasi solusi terpadu yang didokumentasikan dalam Tugas Akhir ini dibatasi pada ruang lingkup sebagai berikut:
+\begin{enumerate}
+    \item \textbf{Keluaran Proyek:} Proyek ini menghasilkan dua artefak utama: (1) sebuah purwarupa fungsional sistem pengelolaan tugas akhir berbasis web bernama D'Office, dan (2) sebuah templat penulisan tugas akhir berbasis \LaTeX{} yang mengimplementasikan pedoman format resmi universitas.
+    
+    \item \textbf{Cakupan Alur Kerja Sistem D'Office:} Fungsionalitas yang diimplementasikan dalam sistem D'Office secara spesifik mencakup alur kerja dari Pengajuan Judul \ac{TA} hingga Mengunggah buku hasil revisi, sebagaimana dijelaskan dalam dokumen prosedur standar departemen \citep{DTEUI:2025}. 
+    Proses di luar rentang tersebut tidak diakomodasi oleh sistem ini.
+    
+    \item \textbf{Batasan Integrasi Sistem:} Pengembangan D'Office tidak mencakup pembangunan jembatan integrasi \ac{API} yang fungsional secara \textit{real-time} ke sistem eksternal seperti \ac{SIAK-NG}. Kebutuhan data dari sistem eksternal akan disimulasikan.
+    
+    \item \textbf{Fokus dan Domain Evaluasi:} Evaluasi penelitian ini dibatasi pada empat domain utama. 
+    Evaluasi efektivitas proses akan berfokus pada metrik berbasis pengguna seperti \ac{TSR}, atau tingkat keberhasilan tugas, dan \ac{ToT}, atau waktu yang dihabiskan untuk tugas. 
+    Evaluasi kinerja sistem akan berfokus pada metrik sisi server, seperti waktu respons kueri dan \ac{TTFB}, atau waktu untuk byte pertama. 
+    Evaluasi akurasi format akan berfokus pada dokumen yang dihasilkan menggunakan templat \LaTeX{}. 
+    Terakhir, evaluasi kualitatif akan berfokus pada persepsi pengguna melalui kuesioner \ac{SUS} atau skala kegunaan sistem, dan wawancara. 
+    Penelitian ini tidak akan menilai kualitas substansi keilmuan dari konten Tugas Akhir.
+\end{enumerate}
+
+%-----------------------------------------------------------------------------%
+\section{Sistematika Penulisan}
+\label{sec:sistematika}
+%-----------------------------------------------------------------------------%
+Laporan \ac{TA} ini disusun secara sistematis ke dalam lima bab utama yang saling berkaitan, dengan rincian sebagai berikut:
+
+\begin{enumerate}
+    \item \textbf{Bab 1: Pendahuluan.} 
+    Bab ini menyajikan gambaran umum penelitian, meliputi latar belakang yang menjelaskan urgensi dan justifikasi pengembangan solusi terpadu, rumusan masalah, tujuan yang ingin dicapai, manfaat penelitian, ruang lingkup penelitian, serta sistematika penulisan laporan ini.
+    
+    \item \textbf{Bab 2: Tinjauan Pustaka.} 
+    Bab ini menguraikan landasan teoretis dan kontekstual yang relevan, dimulai dari pemaparan alur kerja tugas akhir yang ada, landasan teori pengembangan sistem dan templat, rangkuman pedoman penulisan resmi, hingga analisis terhadap sistem sejenis yang berujung pada penentuan posisi penelitian.
+    
+    \item \textbf{Bab 3: Perancangan dan Implementasi Sistem dan Templat.} 
+    Bab ini merupakan bagian inti teknis yang menjelaskan secara detail proses rekayasa untuk kedua keluaran penelitian. Pembahasan mencakup perancangan arsitektur, basis data, dan antarmuka untuk sistem D'Office, serta perancangan struktur dan perintah kustom untuk templat \LaTeX{}. Tahap implementasi dari kedua komponen tersebut juga dipaparkan.
+    
+    \item \textbf{Bab 4: Pengujian dan Analisis.} 
+    Bab ini memaparkan hasil dari serangkaian pengujian dan evaluasi. Cakupannya meliputi analisis kuantitatif terhadap efektivitas alur kerja menggunakan sistem D'Office, serta analisis komparatif terhadap akurasi format penulisan menggunakan templat \LaTeX{} yang telah dikembangkan.
+    
+    \item \textbf{Bab 5: Penutup.} 
+    Bab terakhir ini berisi kesimpulan dari seluruh rangkaian penelitian dan analisis, yang secara lugas menjawab setiap butir rumusan masalah. Selain itu, bab ini juga menyajikan saran untuk potensi pengembangan sistem D'Office dan templat \LaTeX{} di masa mendatang.
+\end{enumerate}

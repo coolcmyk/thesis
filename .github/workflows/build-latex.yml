@@ -1,0 +1,30 @@
+name: Build LaTeX thesis
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/xu-cheng/texlive-full:latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build thesis PDF
+        run: make
+
+      - name: Upload thesis PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: thesis-pdf
+          path: out/thesis.pdf
+          if-no-files-found: error
+          retention-days: 14
