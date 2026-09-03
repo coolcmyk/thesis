@@ -1,0 +1,337 @@
+{
+  "main": {
+    "id": "4b7c2130aeed0089",
+    "type": "split",
+    "children": [
+      {
+        "id": "9e53b0293e9aac5c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "94bf7e1a4f5cd864",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "00-Graph-Start.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "00-Graph-Start"
+            }
+          },
+          {
+            "id": "72cb3beb19bdc4d7",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Papers/Meier et al 2011 - PIXHAWK.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Meier et al 2011 - PIXHAWK"
+            }
+          },
+          {
+            "id": "04ae6be0cffd206d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Paragraphs/B1-01 - Keputusan dan lintasan UAV.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "B1-01 - Keputusan dan lintasan UAV"
+            }
+          },
+          {
+            "id": "5f1a05e1814e762d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Papers/Vivaldini 2025 - Decision-Making-Based Path Planning for Autonomous UAVs.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Vivaldini 2025 - Decision-Making-Based Path Planning for Autonomous UAVs"
+            }
+          },
+          {
+            "id": "8c020a395e996fc1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Chapters/Bab 1 - Pendahuluan.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Bab 1 - Pendahuluan"
+            }
+          },
+          {
+            "id": "477203e62e3abbe7",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Paragraphs/B1-01 - Keputusan dan lintasan UAV.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "B1-01 - Keputusan dan lintasan UAV"
+            }
+          }
+        ],
+        "currentTab": 1
+      },
+      {
+        "id": "c1b00debade303dc",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e853d24fd290ab92",
+            "type": "leaf",
+            "state": {
+              "type": "localgraph",
+              "state": {
+                "file": "Papers/Meier et al 2011 - PIXHAWK.md",
+                "options": {
+                  "collapse-filter": true,
+                  "search": "",
+                  "localJumps": 1,
+                  "localBacklinks": true,
+                  "localForelinks": true,
+                  "localInterlinks": false,
+                  "showTags": false,
+                  "showAttachments": false,
+                  "hideUnresolved": false,
+                  "collapse-color-groups": true,
+                  "colorGroups": [],
+                  "collapse-display": true,
+                  "showArrow": false,
+                  "textFadeMultiplier": 0,
+                  "nodeSizeMultiplier": 1,
+                  "lineSizeMultiplier": 1,
+                  "collapse-forces": true,
+                  "centerStrength": 0.518713248970312,
+                  "repelStrength": 10,
+                  "linkStrength": 1,
+                  "linkDistance": 250,
+                  "scale": 1.9262249808976029,
+                  "close": false
+                }
+              },
+              "icon": "lucide-git-fork",
+              "title": "Local graph"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "758b7c757a2b9a5a",
+    "type": "split",
+    "children": [
+      {
+        "id": "fc4a4095c4c8d07f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d2dca9dbf2d2fe47",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "a18b0f52e250af96",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "e84d574a39a9105d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "2cd1f7e8e2b54c0c",
+    "type": "split",
+    "children": [
+      {
+        "id": "33b4d18bd4b76079",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "164368a2bd9a7f7a",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Papers/Meier et al 2011 - PIXHAWK.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "677a29a4dd2bf926",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Papers/Meier et al 2011 - PIXHAWK.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "fa815d3d5d76e178",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "0e768978a26afe7b",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "1dda42fa71193fc1",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Papers/Meier et al 2011 - PIXHAWK.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "72cb3beb19bdc4d7",
+  "lastOpenFiles": [
+    "00-Graph-Start.md",
+    "README.md",
+    "00-Citation-Map-Bab-1-2.md",
+    "Chapters/Bab 1 - Pendahuluan.md",
+    "Paragraphs/B1-01 - Keputusan dan lintasan UAV.md",
+    "Papers/Vivaldini 2025 - Decision-Making-Based Path Planning for Autonomous UAVs.md",
+    "Paragraphs/B1-02 - Navigasi tujuan objek UAV.md",
+    "Papers/Index Papers.md",
+    "Chapters/Bab 2 - Tinjauan Pustaka.md",
+    "Chapters",
+    "Paragraphs/B2-09 - Navigasi UAV berbasis bahasa.md",
+    "Paragraphs/B2-08 - VLM untuk inspeksi UAV.md",
+    "Paragraphs/B2-07 - Benchmark reproduksibel.md",
+    "Paragraphs/B2-06 - ROS 2 dan frame.md",
+    "Paragraphs/B2-05 - Instruksi multilangkah.md",
+    "Paragraphs/B2-04 - Penalaran spasial.md",
+    "Paragraphs/B2-03 - Model visi bahasa.md",
+    "Paragraphs/B2-02 - Navigasi geometris dan semantik.md",
+    "Paragraphs/B2-01 - UAV dan navigasi otonom.md",
+    "Papers/Zhang et al 2025 - VLM Sky-Ready.md",
+    "Papers/Radford 2021 - CLIP.md",
+    "Papers/Macenski 2022 - ROS 2.md",
+    "Papers/Ayala 2024 - UAV Object-Goal Navigation Review.md",
+    "Papers/Ma 2019 - Self-Monitoring Navigation Agent.md",
+    "Paragraphs/B1-06 - Benchmark UAV.md",
+    "Paragraphs/B1-05 - ROS 2 dan integrasi.md",
+    "Paragraphs/B1-04 - Dasar VLM.md",
+    "Paragraphs",
+    "Papers"
+  ]
+}

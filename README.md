@@ -31,13 +31,32 @@ Contributors:
 
 ## Building the thesis
 
-The main document is `thesis.tex`. Build it with [TeX Live](https://www.tug.org/texlive/) (or another LaTeX distribution) that includes `latexmk`, `minted`, and Pygments.
+The main document is `thesis.tex`. Build it with [Tectonic](https://tectonic-typesetting.github.io/) and [Pygments](https://pygments.org/). Tectonic downloads required LaTeX packages automatically; Pygments renders the `minted` source-code listings.
 
 ```sh
 make
 ```
 
-The generated PDF is written to `out/thesis.pdf`. The template enables `-shell-escape` because `minted` uses Pygments to render source-code listings.
+The generated PDF is written to `out/thesis.pdf`. The build enables Tectonic's shell escape because `minted` uses Pygments to render source-code listings.
+
+### Live browser preview
+
+The preview uses the same two-process workflow as `mml-solutions`: `watchexec` rebuilds the document when a source file changes and `browser-sync` serves and reloads the generated PDF. Install those tools if needed:
+
+```sh
+cargo install watchexec-cli
+npm install -g browser-sync
+```
+
+Start the watcher and browser preview with:
+
+```sh
+make serve
+```
+
+BrowserSync opens the PDF (normally at <http://localhost:3000/thesis.pdf>) and reloads it after each successful build. Stop both processes with <kbd>Ctrl</kbd>+<kbd>C</kbd>.
+
+The watcher invokes Tectonic with shell escape enabled so `minted` can run Pygments. A local `pdflscape` compatibility fallback is included for Tectonic's XeTeX engine.
 
 To remove generated build files:
 

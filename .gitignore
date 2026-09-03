@@ -1,0 +1,15 @@
+out/
+_minted-*/
+*.aux
+*.bbl
+*.blg
+*.loe
+*.lof
+*.log
+*.lol
+*.lot
+*.nlo
+*.out
+*.synctex.gz
+*.toc
+*.xdv

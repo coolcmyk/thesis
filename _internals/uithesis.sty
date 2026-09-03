@@ -122,7 +122,7 @@
 % 'below' mengatur jarak antara caption dengan tabelnya.
 \captionsetup[table]{
     font=footnotesize,
-    skip=15pt, % Jarak antara caption dan tabel (Anda ingin ini rapat)
+    skip=5pt, % Jarak antara caption dan tabel (Anda ingin ini rapat)
     position=top, % Pastikan caption selalu di atas,
     justification=centering
 }
@@ -195,7 +195,7 @@
 % 
 \usepackage{float}
   \floatplacement{figure}{H}
-  \floatplacement{table}{H}
+  \floatplacement{table}{htbp}
 
 % Bibliography
 \usepackage[numbers,sort&compress]{natbib}
@@ -212,7 +212,6 @@
 %\setlength{\cftbeforelstlistingskip}{0pt} 
 
 \newlistof{equs}{loe}{Daftar Persamaan}
-\newlistof{listing}{lol}{Daftar Kode Program}
 \newlistof{abbreviation}{loab}{Daftar Singkatan}
 \usepackage[newfloat]{minted}
 \usepackage{caption}
@@ -251,9 +250,6 @@
 
 \renewcommand{\cftequspresnum}{}
 \setlength{\cftequsnumwidth}{1.2in}
-
-\renewcommand{\cftlistingpresnum}{\textbf{Kode}~}
-\setlength{\cftlistingnumwidth}{1.2in}
 
 \renewcommand{\cftfigpresnum}{\figurename~}
 \setlength{\cftfignumwidth}{1.2in}
@@ -423,13 +419,8 @@
 % 
 % 
 \renewcommand{\listtablename}{\uppercase{Daftar Tabel}}
-% 
-% 
-\renewcommand{\listlistingname}{\uppercase{Daftar Kode Program}}
-% 
-% 
+%  
 \newcommand{\listabbreviationname}{\uppercase{Daftar Singkatan}}
-% 
 % 
 \renewcommand{\chaptername}{BAB}
 % 

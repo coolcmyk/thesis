@@ -1,4 +1,58 @@
-%-----------------------------------------------------------------------------%
-\addChapter{Lampiran 1}
-\chapter*{Lampiran 1}
-%-----------------------------------------------------------------------------%
+%---------------------------------------------------------------------%
+\addChapter{Lampiran 1 - Kode Program}
+\chapter*{Lampiran 1 - Kode Program}
+%---------------------------------------------------------------------%
+
+\section*{Lampiran 1.1 Contoh Penulisan Kode Program (\texttt{contoh.py})}
+\addcontentsline{toc}{section}{Lampiran 1.1 Contoh Penulisan Kode Program (contoh.py)}
+
+Lampiran digunakan untuk memuat berkas pendukung seperti kode program, data
+mentah, atau dokumen tambahan. Potongan kode ditulis menggunakan lingkungan
+\texttt{lstlisting} dengan gaya \texttt{mystyle} yang telah didefinisikan pada
+\texttt{thesis.tex}.
+
+\begin{lstlisting}[
+    style=mystyle,
+    language=Python,
+]
+def main():
+    """Ganti isi lampiran ini dengan kode program yang sebenarnya."""
+    data = [1, 2, 3, 4, 5]
+    total = sum(data)
+    print("Jumlah data:", len(data))
+    print("Total nilai:", total)
+
+
+if __name__ == "__main__":
+    main()
+\end{lstlisting}
+
+%---------------------------------------------------------------------%
+\section*{Lampiran 1.2 Contoh Lampiran Tabel}
+\addcontentsline{toc}{section}{Lampiran 1.2 Contoh Lampiran Tabel}
+
+Tabel pendukung yang terlalu panjang untuk dimuat pada batang tubuh laporan
+dapat diletakkan pada lampiran.
+
+\begin{table}[htbp]
+    \centering
+    \addtocounter{table}{-1}
+    \caption{Contoh tabel pada lampiran}
+    \label{tab:contoh_lampiran}
+    \small
+    \setlength{\tabcolsep}{4pt}
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabularx}{\textwidth}{
+        >{\centering\arraybackslash}p{2cm}
+        >{\raggedright\arraybackslash}p{3cm}
+        >{\raggedright\arraybackslash}X
+    }
+        \toprule
+        \textbf{No.} & \textbf{Parameter} & \textbf{Keterangan} \\
+        \midrule
+        1 & Parameter A & Keterangan parameter pertama. \\
+        2 & Parameter B & Keterangan parameter kedua. \\
+        3 & Parameter C & Keterangan parameter ketiga. \\
+        \bottomrule
+    \end{tabularx}
+\end{table}

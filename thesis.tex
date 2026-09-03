@@ -18,6 +18,39 @@
 % Load konfigurasi LaTeX untuk tipe laporan thesis
 \usepackage{_internals/uithesis}
 \usepackage{_internals/tikz-uml}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tabularx}
+\usepackage{ltablex}
+\usepackage[section]{placeins}
+\keepXColumns
+\usepackage{tocloft}
+\usepackage{booktabs}
+\usepackage{array}
+
+\setlength{\textfloatsep}{12pt plus 2pt minus 2pt}
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+
+% ===============================
+% Daftar Persamaan
+% ===============================
+\newcommand{\listofequationsname}{DAFTAR PERSAMAAN}
+\newlistof{skripsiequations}{loeq}{\listofequationsname}
+
+% Format nomor pada Daftar Persamaan
+\renewcommand{\cftskripsiequationspresnum}{\textbf{Persamaan~}}
+\renewcommand{\cftskripsiequationsaftersnum}{\normalfont}
+\setlength{\cftskripsiequationsnumwidth}{3.7cm}
+
+\newcommand{\eqcaption}[3]{%
+\begin{equation}
+#1
+\label{#2}
+\end{equation}
+\addcontentsline{loeq}{skripsiequations}{\protect\numberline{\theequation}#3}
+}
 
 % Daftar pemenggalan suku kata dan istilah dalam LaTeX
 \input{_internals/hype.indonesia}
@@ -29,6 +62,61 @@
 
 % Awal bagian penulisan laporan
 \begin{document}
+
+
+% Tambahan CUSTOM 
+
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.95}
+\definecolor{codeblue}{rgb}{0.0,0.0,0.6}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegray}\itshape,
+    keywordstyle=\color{codeblue}\bfseries,
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{codegray},
+    stepnumber=1,
+    numbersep=8pt,
+    breaklines=true,
+    breakatwhitespace=true,
+    frame=single,
+    rulecolor=\color{black},
+    tabsize=4,
+    captionpos=b,
+    showstringspaces=false
+}
+
+% Style pseudocode ala artikel ilmiah: caption ringkas di atas, isi kecil,
+% spasi rapat, indent tidak terlalu lebar, dan nomor baris kecil.
+\floatstyle{ruled}
+\restylefloat{algorithm}
+\captionsetup[algorithm]{
+    font=footnotesize,
+    labelfont=bf,
+    labelsep=period,
+    justification=raggedright,
+    singlelinecheck=false,
+    skip=4pt
+}
+\algrenewcommand\algorithmicindent{1.0em}
+\algrenewcommand\alglinenumber[1]{\scriptsize\ttfamily\color{codegray}#1}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\newenvironment{compactalgorithmic}[1][1]{%
+    \fontsize{1}{1}
+    \setstretch{1.0}
+    \begin{algorithmic}[#1]
+}{%
+    \end{algorithmic}
+}
+
+% Tambahan CUstom end
+
+
 %
 % Sampul Laporan
 \input{_internals/sampul}
@@ -116,18 +204,7 @@
 \clearpage
 \phantomsection
 \addcontentsline{toc}{chapter}{DAFTAR PERSAMAAN}
-\listofequs
-\clearpage
-\phantomsection
-\input{src/00-front_matter/daftar-notasi}%Jika diperlukan
-\clearpage
-%\phantomsection
-%\addcontentsline{toc}{chapter}{DAFTAR ISTILAH}
-%\printnomenclature%Jika diperlukan
-%\clearpage
-\phantomsection
-\addcontentsline{toc}{chapter}{\listlistingname}
-\listoflistings%Jika diperlukan
+\listofskripsiequations
 \clearpage
 \phantomsection
 \addcontentsline{toc}{chapter}{\listabbreviationname}
@@ -176,10 +253,10 @@
 %
 % Lampiran 
 %
-% \begin{appendix}
-% 	\input{_internals/markLampiran}
-% 	\setcounter{page}{2}\textbf{}
-% 	\input{src/99-back_matter/lampiran}
-% \end{appendix}
+%\begin{appendix}
+%    \input{_internals/markLampiran}
+%    \setcounter{page}{2}\textbf{}
+%    \input{src/99-back_matter/lampiran}
+%\end{appendix}
 
 \end{document}
