@@ -22,6 +22,16 @@ all: doc
 doc: pdf
 pdf: $(DOCNAME).pdf
 
+# Synchronize the generated Obsidian paragraph notes before every document build.
+$(DOCNAME).pdf: sync-obsidian
+
+sync-obsidian:
+	@python3 scripts/sync_obsidian_paragraphs.py
+
+sync-obsidian-watch:
+	@$(MAKE) --no-print-directory sync-obsidian
+	$(WATCHEXEC) --watch src/01-body --exts tex -- $(MAKE) --no-print-directory sync-obsidian
+
 # Rules
 %.pdf: %.tex
 	@mkdir -p out
@@ -44,12 +54,12 @@ serve: pdf
 		$(WATCHEXEC) --postpone --watch thesis.tex --watch settings.tex --watch istilah.tex \
 			--watch singkatan.tex --watch pustaka.bib --watch acknowledgement.txt \
 			--watch src --watch _internals --watch assets -- \
-			$(COMPILE) & \
+			$(MAKE) --no-print-directory sync-obsidian && $(COMPILE) & \
 		watcher_pid=$$!; \
 		$(BROWSER_SYNC) start --server out --files "out/$(DOCNAME).pdf" \
 			--startPath "$(DOCNAME).pdf" --no-notify
 
-.PHONY: all clean doc mostlyclean pdf serve
+.PHONY: all clean doc mostlyclean pdf serve sync-obsidian sync-obsidian-watch
 
 # Include auto-generated dependencies
 -include *.d

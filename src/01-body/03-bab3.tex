@@ -18,6 +18,24 @@ Setelah implementasi, setiap \textit{backend} diuji pada episode yang sama agar 
 %-----------------------------------------------------------------------------%
 Arsitektur terdiri atas pembangun pengamatan, adaptor \textit{backend}, pengurai aksi, gerbang keselamatan, pengelola misi, pengendali tingkat rendah, dan pencatat eksperimen. Pembangun pengamatan menggabungkan citra RGB depan, kedalaman terdaftar, keadaan UAV, ringkasan kemajuan misi, serta instruksi bahasa alami ke dalam \texttt{CanonicalObservation}. Adaptor menyiapkan masukan sesuai kebutuhan model dan mengembalikan respons mentah beserta metadata inferensi.
 
+Gambar~\ref{fig:dronevlm-model-adapter} menunjukkan bahwa GPT-5.6, Qwen3.6, dan Gemini Robotics hanya terhubung ke jalur penerbangan melalui DroneVLM Model Adapter. GPT-5.6 menggunakan antarmuka API gambar--teks, Qwen3.6 menggunakan antarmuka gambar--teks dengan arsitektur \textit{multimodal mixture-of-experts}, sedangkan Gemini Robotics menggunakan antarmuka \textit{vision-language-action}. Perbedaan antarmuka tersebut dinormalisasi menjadi kontrak pengamatan dan aksi yang sama sebelum respons diperiksa oleh pengurai serta gerbang keselamatan. Dengan rancangan ini, pengendali penerbangan tetap tidak bergantung pada model yang digunakan.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{assets/pics/dronevlm-model-adapter.png}
+    \caption{Arsitektur integrasi \textit{backend} model melalui DroneVLM Model Adapter.}
+    \label{fig:dronevlm-model-adapter}
+\end{figure}
+
+Gambar~\ref{fig:model-interface-comparison} memperlihatkan perbedaan antarmuka keluaran ketiga model. GPT-5.6 mengembalikan respons API, Qwen3.6 menghasilkan respons model, sedangkan Gemini Robotics menyediakan keluaran VLA yang dapat berbentuk tindakan motor. Perbedaan ini merupakan alasan penggunaan adaptor dan kontrak aksi kanonis. Dalam DroneVLM, tindakan motor mentah dari antarmuka VLA tidak diteruskan ke UAV; adaptor harus mengubahnya menjadi aksi tingkat tinggi yang terbatas atau menolaknya sebelum pengurai dan gerbang keselamatan memprosesnya.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{assets/pics/dronevlm-model-interface-comparison.png}
+    \caption{Perbedaan bentuk masukan dan keluaran pada GPT-5.6, Qwen3.6, dan Gemini Robotics sebelum dinormalisasi oleh adaptor.}
+    \label{fig:model-interface-comparison}
+\end{figure}
+
 Pengurai mengubah respons tersebut menjadi aksi pada kontrak bersama. Kosakata aksi yang digunakan adalah sebagai berikut.
 \begin{itemize}
     \item \texttt{MOVE\_RELATIVE}, untuk gerakan relatif berbatas;
@@ -33,12 +51,12 @@ Gerbang keselamatan memeriksa skema, batas gerak, batas yaw, geofence, usia data
 \section{Rancangan DroneVLM-Arena}
 \label{sec:rancangan_arena}
 %-----------------------------------------------------------------------------%
-Setiap episode DroneVLM-Arena mendefinisikan versi adegan, \textit{seed}, pose awal, instruksi, target, kondisi lingkungan, anggaran waktu dan keputusan, batasan keselamatan, kondisi terminal, serta kebenaran dasar. Tugas dibagi menjadi penambatan visual, penalaran spasial, pencarian objek, navigasi semantik, dan instruksi multilangkah. Label simulator dan transformasi objek hanya digunakan untuk anotasi, baseline oracle, dan evaluasi pada kondisi utama.
+Setiap episode DroneVLM-Arena mendefinisikan versi adegan, \textit{seed}, pose awal, instruksi, target, kondisi lingkungan, anggaran waktu dan keputusan, batasan keselamatan, kondisi terminal, serta \textit{ground truth}. Tugas dibagi menjadi penambatan visual, penalaran spasial, pencarian objek, navigasi semantik, dan instruksi multilangkah. Label simulator dan transformasi objek hanya digunakan untuk anotasi, baseline oracle, dan evaluasi pada kondisi utama.
 
 %-----------------------------------------------------------------------------%
 \section{Protokol Eksperimen dan Pencatatan}
 \label{sec:protokol_eksperimen}
 %-----------------------------------------------------------------------------%
-Sebelum pengujian, versi model, checksum bobot, kuantisasi, \textit{runtime}, prosesor, templat \textit{prompt}, dan parameter dekode dikunci serta dicatat. Seluruh \textit{backend} menggunakan episode, pengendali, batasan keselamatan, kebijakan coba-ulang, dan evaluator yang sama. Log per keputusan memuat pengamatan yang digunakan, respons mentah, aksi hasil normalisasi, keputusan gerbang keselamatan, keadaan UAV, waktu inferensi, serta alasan kondisi terminal.
+Sebelum pengujian, konfigurasi GPT-5.6, Qwen3.6, dan Gemini Robotics dikunci serta dicatat. Catatan tersebut memuat identitas versi atau rilis, penyedia dan jenis antarmuka, prapemrosesan gambar, template \textit{prompt}, parameter dekode, \textit{runtime}, serta wilayah atau konfigurasi layanan apabila relevan. Checksum bobot dan kuantisasi hanya dicatat untuk model yang dijalankan secara lokal. Seluruh \textit{backend} menggunakan episode, pengendali, batasan keselamatan, kebijakan coba-ulang, dan evaluator yang sama. Log per keputusan memuat pengamatan yang digunakan, respons mentah, aksi hasil normalisasi, keputusan gerbang keselamatan, keadaan UAV, waktu inferensi, serta alasan kondisi terminal.
 
 Metrik utama mencakup akurasi penambatan, tingkat keberhasilan misi, efisiensi lintasan, tingkat tabrakan, tingkat aksi tidak valid, jumlah intervensi keselamatan, latensi inferensi, dan latensi keputusan ujung-ke-ujung. Analisis adaptasi LoRA dan GRPO dilakukan sebagai kondisi tambahan apabila data pelatihan dan sumber daya komputasi telah tersedia.
