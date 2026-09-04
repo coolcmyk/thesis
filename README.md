@@ -1,11 +1,11 @@
-# DroneVLM
+# DroneVL
 
-DroneVLM is a thesis project on a model-agnostic adapter for semantic UAV navigation in CoSyS-AirSim and ROS 2.
+DroneVL is a thesis project on a model-agnostic adapter for semantic UAV navigation in CoSyS-AirSim and ROS 2.
 
 It compares GPT-5.6, Qwen3.6, and Gemini Robotics through one canonical observation/action contract:
 
 ```text
-model backend → DroneVLM adapter → parser + safety gate → fixed flight controller
+model backend → DroneVL adapter → parser + safety gate → fixed flight controller
 ```
 
 The repository contains the LaTeX thesis, bibliography, figures, and linked Obsidian literature notes.
@@ -58,6 +58,16 @@ make serve
 ```
 
 This watches thesis sources and opens `out/thesis.pdf` through BrowserSync.
+
+## AI review (Coarse)
+
+Coarse provides a local, subscription-backed review pass over a flattened copy of the thesis. After its one-time setup in `.review/`, run:
+
+```sh
+make review
+```
+
+The report is written to `.review/output/`. Use `make review-detached` for a background run and `make review-follow` to follow it. The review workspace and generated reports are ignored by Git.
 
 ## Clean
 

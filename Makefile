@@ -63,3 +63,34 @@ serve: pdf
 
 # Include auto-generated dependencies
 -include *.d
+
+# Local, subscription-backed AI thesis reviewer.
+REVIEW_DIR ?= .review
+COARSE ?= $(REVIEW_DIR)/.venv/bin/coarse-review
+REVIEW_SOURCE ?= $(REVIEW_DIR)/thesis-for-review.tex
+REVIEW_OUTPUT ?= $(REVIEW_DIR)/output
+REVIEW_HOST ?= codex
+REVIEW_EFFORT ?= high
+REVIEW_LANGUAGE ?= Indonesian
+REVIEW_MODEL ?=
+
+# Flatten the multi-file thesis before review because Coarse accepts one source
+# document and does not recursively resolve LaTeX \input directives.
+review-source:
+	@mkdir -p $(REVIEW_DIR)
+	@python3 scripts/flatten_thesis_for_review.py thesis.tex $(REVIEW_SOURCE)
+
+review: review-source
+	@test -x "$(COARSE)" || { echo "Coarse is not installed at $(COARSE)." >&2; exit 1; }
+	$(COARSE) $(REVIEW_SOURCE) --host $(REVIEW_HOST) --effort $(REVIEW_EFFORT) --language "$(REVIEW_LANGUAGE)" --output-dir $(REVIEW_OUTPUT) $(if $(REVIEW_MODEL),--model $(REVIEW_MODEL))
+
+# Start a review in the background; inspect progress with `make review-follow`.
+review-detached: review-source
+	@test -x "$(COARSE)" || { echo "Coarse is not installed at $(COARSE)." >&2; exit 1; }
+	$(COARSE) $(REVIEW_SOURCE) --host $(REVIEW_HOST) --effort $(REVIEW_EFFORT) --language "$(REVIEW_LANGUAGE)" --output-dir $(REVIEW_OUTPUT) --detach --log-file $(REVIEW_DIR)/coarse.log $(if $(REVIEW_MODEL),--model $(REVIEW_MODEL))
+
+review-follow:
+	@test -x "$(COARSE)" || { echo "Coarse is not installed at $(COARSE)." >&2; exit 1; }
+	$(COARSE) --attach $(REVIEW_DIR)/coarse.log
+
+.PHONY: review review-detached review-follow review-source

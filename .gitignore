@@ -13,3 +13,9 @@ _minted-*/
 *.synctex.gz
 *.toc
 *.xdv
+
+# Local Coarse reviewer environment, flattened source, logs, and reports.
+.review/
+
+# Python bytecode cache.
+__pycache__/

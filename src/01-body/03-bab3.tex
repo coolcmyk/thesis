@@ -2,32 +2,32 @@
 \chapter{\babTiga}
 \label{cha:metodologi}
 %-----------------------------------------------------------------------------%
-Bab ini menjelaskan metodologi penelitian dan rancangan sistem DroneVLM. Rancangan berfokus pada pemisahan antara inferensi VLM yang bergantung pada \textit{backend} dan komponen navigasi yang harus tetap sama pada seluruh eksperimen.
+Bab ini menjelaskan metodologi penelitian dan rancangan sistem DroneVL. Rancangan memisahkan inferensi VLM atau VLA yang bergantung pada \textit{backend} dari komponen navigasi yang dibekukan pada seluruh kondisi eksperimen. Spesifikasi berikut menjadi acuan implementasi, pencatatan, dan evaluasi; setiap nilai konfigurasi yang belum bersifat universal dibekukan dalam manifest eksperimen sebelum pengujian dimulai.
 
 %-----------------------------------------------------------------------------%
 \section{Desain Penelitian}
 \label{sec:desain_penelitian}
 %-----------------------------------------------------------------------------%
-Penelitian menggunakan pendekatan rekayasa sistem dan evaluasi eksperimental. Artefak yang dibangun meliputi DroneVLM, yaitu adaptor untuk berbagai VLM, serta DroneVLM-Arena sebagai kerangka evaluasi \textit{closed-loop}.
+Penelitian menggunakan pendekatan rekayasa sistem dan evaluasi eksperimental. Artefak yang dibangun meliputi DroneVL sebagai adaptor untuk VLM dan VLA, serta DroneVL Arena sebagai kerangka evaluasi \textit{closed-loop}. Evaluasi membedakan dua kondisi. Kondisi antarmuka bersama menyetarakan episode, sensor yang diizinkan, resolusi masukan, riwayat, \textit{prompt}, frekuensi keputusan, batas waktu, kebijakan coba-ulang, pengendali, dan evaluator sejauh didukung semua \textit{backend}. Kondisi kapabilitas asli mencatat konfigurasi terbaik yang sah bagi setiap \textit{backend}; hasilnya dilaporkan terpisah dan tidak ditafsirkan sebagai pengaruh model semata.
 
-Setelah implementasi, setiap \textit{backend} diuji pada episode yang sama agar perbedaan hasil dapat dikaitkan dengan model atau konfigurasi inferensi, bukan dengan perubahan pengendali maupun skenario.
+Setiap episode memiliki pasangan percobaan yang sama pada seluruh \textit{backend}. Kesamaan jalur hilir mengendalikan perubahan pengendali dan skenario, tetapi tidak menghapus perbedaan bawaan seperti modalitas, panjang konteks, atau latensi layanan. Karena itu, konfigurasi efektif dan kehilangan informasi akibat normalisasi dicatat bersama hasil eksperimen.
 
 %-----------------------------------------------------------------------------%
-\section{Rancangan Arsitektur DroneVLM}
-\label{sec:rancangan_dronevlm}
+\section{Rancangan Arsitektur DroneVL}
+\label{sec:rancangan_dronevl}
 %-----------------------------------------------------------------------------%
-Arsitektur terdiri atas pembangun pengamatan, adaptor \textit{backend}, pengurai aksi, gerbang keselamatan, pengelola misi, pengendali tingkat rendah, dan pencatat eksperimen. Pembangun pengamatan menggabungkan citra RGB depan, kedalaman terdaftar, keadaan UAV, ringkasan kemajuan misi, serta instruksi bahasa alami ke dalam \texttt{CanonicalObservation}. Adaptor menyiapkan masukan sesuai kebutuhan model dan mengembalikan respons mentah beserta metadata inferensi.
+Arsitektur terdiri atas pembangun pengamatan, adaptor \textit{backend}, pengurai respons, pengelola misi, gerbang keselamatan, pengendali tingkat rendah, dan pencatat eksperimen. Alur representasi dibekukan sebagai berikut: \textit{CanonicalObservation} $\rightarrow$ permintaan khusus-\textit{backend} $\rightarrow$ respons mentah dan metadata $\rightarrow$ hasil deserialisasi khusus-\textit{backend} $\rightarrow$ aksi kanonis atau usulan peristiwa misi $\rightarrow$ keputusan keselamatan $\rightarrow$ aksi aktual. Adaptor hanya bertanggung jawab atas dua tahap khusus-\textit{backend}; pengurai memiliki satu tanggung jawab untuk membentuk representasi kanonis dan melaporkan kegagalan penguraian.
 
-Gambar~\ref{fig:dronevlm-model-adapter} menunjukkan bahwa GPT-5.6, Qwen3.6, dan Gemini Robotics hanya terhubung ke jalur penerbangan melalui DroneVLM Model Adapter. GPT-5.6 menggunakan antarmuka API gambar--teks, Qwen3.6 menggunakan antarmuka gambar--teks dengan arsitektur \textit{multimodal mixture-of-experts}, sedangkan Gemini Robotics menggunakan antarmuka \textit{vision-language-action}. Perbedaan antarmuka tersebut dinormalisasi menjadi kontrak pengamatan dan aksi yang sama sebelum respons diperiksa oleh pengurai serta gerbang keselamatan. Dengan rancangan ini, pengendali penerbangan tetap tidak bergantung pada model yang digunakan.
+Gambar~\ref{fig:dronevl-model-adapter} menunjukkan bahwa GPT-5.6, Qwen3.6, dan Gemini Robotics hanya terhubung ke jalur penerbangan melalui DroneVL Model Adapter. GPT-5.6 menggunakan antarmuka API gambar--teks, Qwen3.6 menggunakan antarmuka gambar--teks dengan arsitektur \textit{multimodal mixture-of-experts}, sedangkan Gemini Robotics menggunakan antarmuka \textit{vision-language-action}. Tindakan motor mentah dari antarmuka VLA tidak diteruskan ke UAV; tindakan tersebut harus dinormalisasi menjadi aksi tingkat tinggi yang dibatasi atau ditolak sebelum memasuki pengurai dan gerbang keselamatan.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{assets/pics/dronevlm-model-adapter.png}
-    \caption{Arsitektur integrasi \textit{backend} model melalui DroneVLM Model Adapter.}
-    \label{fig:dronevlm-model-adapter}
+    \includegraphics[width=\textwidth]{assets/pics/dronevlm-unified-model-adapter.png}
+    \caption{Arsitektur integrasi \textit{backend} model melalui DroneVL Model Adapter.}
+    \label{fig:dronevl-model-adapter}
 \end{figure}
 
-Gambar~\ref{fig:model-interface-comparison} memperlihatkan perbedaan antarmuka keluaran ketiga model. GPT-5.6 mengembalikan respons API, Qwen3.6 menghasilkan respons model, sedangkan Gemini Robotics menyediakan keluaran VLA yang dapat berbentuk tindakan motor. Perbedaan ini merupakan alasan penggunaan adaptor dan kontrak aksi kanonis. Dalam DroneVLM, tindakan motor mentah dari antarmuka VLA tidak diteruskan ke UAV; adaptor harus mengubahnya menjadi aksi tingkat tinggi yang terbatas atau menolaknya sebelum pengurai dan gerbang keselamatan memprosesnya.
+Gambar~\ref{fig:model-interface-comparison} memperlihatkan perbedaan antarmuka keluaran ketiga model sebelum normalisasi. Perbedaan ini menjadi objek pencatatan pada lapisan adaptor, bukan alasan untuk mengubah pengendali, evaluator, atau aturan terminal.
 
 \begin{figure}[htbp]
     \centering
@@ -36,27 +36,42 @@ Gambar~\ref{fig:model-interface-comparison} memperlihatkan perbedaan antarmuka k
     \label{fig:model-interface-comparison}
 \end{figure}
 
-Pengurai mengubah respons tersebut menjadi aksi pada kontrak bersama. Kosakata aksi yang digunakan adalah sebagai berikut.
-\begin{itemize}
-    \item \texttt{MOVE\_RELATIVE}, untuk gerakan relatif berbatas;
-    \item \texttt{ROTATE\_YAW}, untuk perubahan orientasi yaw;
-    \item \texttt{HOVER\_AND\_OBSERVE}, untuk melayang dan memperoleh pengamatan baru;
-    \item \texttt{DECLARE\_TARGET}, untuk mendeklarasikan sasaran;
-    \item \texttt{ADVANCE\_SUBGOAL}, untuk menandai kemajuan subtujuan; dan
-    \item \texttt{ABORT}, untuk menghentikan misi secara terkendali.
-\end{itemize}
-Gerbang keselamatan memeriksa skema, batas gerak, batas yaw, geofence, usia data, jarak bebas, serta anggaran waktu dan keputusan. Aksi yang diterima dijalankan oleh pengendali tingkat rendah yang sama untuk semua \textit{backend}.
+\subsection{Kontrak Pengamatan Kanonis}
+\label{subsec:canonical_observation}
+Setiap keputusan menerima \texttt{CanonicalObservation} berversi yang sedikitnya memuat \texttt{schema\_version}, \texttt{episode\_id}, \texttt{decision\_id}, waktu simulator, waktu dinding, dan cap waktu penangkapan sensor. Isinya terdiri atas citra RGB depan; kedalaman terdaftar beserta satuan dan kerangka kameranya; keadaan UAV yang memuat pose, kecepatan, dan orientasi; instruksi; serta ringkasan kemajuan misi yang dihasilkan pengelola misi. Manifest menentukan resolusi, pemotongan, normalisasi, usia maksimum frame, frekuensi keputusan, dan cara riwayat dipadatkan.
+
+Segmentasi instans, label objek, transformasi objek, serta anotasi target tidak berada dalam \texttt{CanonicalObservation}. Data tersebut hanya dapat dibaca pembangun manifest, baseline oracle, dan evaluator melalui kanal oracle terpisah. Pembangun pengamatan mengunci pasangan RGB, kedalaman, dan odometri pada waktu simulator yang sama; frame yang melampaui usia maksimum dibuang, bukan dikirimkan ke \textit{backend}.
+
+\subsection{Kontrak Aksi dan Peristiwa Misi}
+\label{subsec:canonical_action}
+Aksi kendali kanonis memuat \texttt{action\_type}, \texttt{observation\_id}, \texttt{sequence\_id}, \texttt{valid\_until}, dan parameter bernilai hingga. \texttt{MOVE\_RELATIVE} memuat perpindahan $(\Delta x,\Delta y,\Delta z)$ dalam meter pada kerangka badan UAV yang dinyatakan manifest; \texttt{ROTATE\_YAW} memuat perubahan yaw dalam radian; \texttt{HOVER\_AND\_OBSERVE} memuat durasi terbatas; dan \texttt{ABORT} tidak memiliki parameter gerak. Satu konversi kerangka dari aksi kanonis ke perintah pengendali dilakukan pada batas pengendali, sehingga adaptor tidak dapat melakukan transformasi koordinat tambahan.
+
+\texttt{DECLARE\_TARGET} dan \texttt{ADVANCE\_SUBGOAL} bukan aksi kendali. Keduanya adalah usulan peristiwa misi yang memuat identitas atau predikat yang diklaim; pengelola misi memverifikasi usulan terhadap kondisi episode dan kanal oracle evaluator sebelum mengubah keadaan misi. Penolakan usulan dicatat sebagai kegagalan semantik, bukan sebagai kegagalan pengendali.
+
+Pengurai memeriksa skema, bidang wajib, tipe data, nilai numerik berhingga, rentang aksi, cap waktu, dan legalitas aksi pada keadaan misi saat ini. Satu \textit{prompt} perbaikan dapat digunakan untuk respons tidak valid. Setelah $N_{\mathrm{parse}}$ kegagalan penguraian berturut-turut---nilai yang dibekukan dalam manifest---episode diakhiri dengan \texttt{PARSE\_FAILURE}; penghitung hanya direset oleh aksi kanonis yang valid.
 
 %-----------------------------------------------------------------------------%
-\section{Rancangan DroneVLM-Arena}
+\section{Rancangan DroneVL Arena}
 \label{sec:rancangan_arena}
 %-----------------------------------------------------------------------------%
-Setiap episode DroneVLM-Arena mendefinisikan versi adegan, \textit{seed}, pose awal, instruksi, target, kondisi lingkungan, anggaran waktu dan keputusan, batasan keselamatan, kondisi terminal, serta \textit{ground truth}. Tugas dibagi menjadi penambatan visual, penalaran spasial, pencarian objek, navigasi semantik, dan instruksi multilangkah. Label simulator dan transformasi objek hanya digunakan untuk anotasi, baseline oracle, dan evaluasi pada kondisi utama.
+Setiap episode DroneVL Arena didefinisikan oleh manifest berversi yang memuat identitas dan versi adegan, \textit{seed}, pose awal, instruksi, target, kondisi lingkungan, anggaran waktu dan keputusan, batasan keselamatan, kondisi terminal, serta anotasi \textit{ground truth}. Setiap episode menerima satu atau lebih label kemampuan: penambatan visual, penalaran spasial, pencarian objek, navigasi semantik, dan instruksi multilangkah. Hasil dilaporkan menurut hasil misi akhir dan menurut label kemampuan; satu episode multikemampuan tidak dipaksa masuk ke satu kategori eksklusif.
+
+Manifest membedakan split pelatihan, pengembangan, dan pengujian. Split pengujian dibekukan sebelum penyetelan dan dipisahkan dari pelatihan maupun pengembangan berdasarkan tata ruang, instans objek, komposisi instruksi, dan kondisi visual. Keberhasilan misi memerlukan pemenuhan target, predikat relasi bila ada, urutan subtujuan, toleransi pose, dan durasi bertahan yang ditetapkan oleh manifest. Untuk relasi spasial, evaluator memeriksa kecocokan instans target dan predikat pose secara terpisah dengan kerangka acuan, toleransi, serta waktu penilaian yang eksplisit.
 
 %-----------------------------------------------------------------------------%
-\section{Protokol Eksperimen dan Pencatatan}
+\section{Protokol Eksperimen, Log, dan Metrik}
 \label{sec:protokol_eksperimen}
 %-----------------------------------------------------------------------------%
-Sebelum pengujian, konfigurasi GPT-5.6, Qwen3.6, dan Gemini Robotics dikunci serta dicatat. Catatan tersebut memuat identitas versi atau rilis, penyedia dan jenis antarmuka, prapemrosesan gambar, template \textit{prompt}, parameter dekode, \textit{runtime}, serta wilayah atau konfigurasi layanan apabila relevan. Checksum bobot dan kuantisasi hanya dicatat untuk model yang dijalankan secara lokal. Seluruh \textit{backend} menggunakan episode, pengendali, batasan keselamatan, kebijakan coba-ulang, dan evaluator yang sama. Log per keputusan memuat pengamatan yang digunakan, respons mentah, aksi hasil normalisasi, keputusan gerbang keselamatan, keadaan UAV, waktu inferensi, serta alasan kondisi terminal.
+Sebelum pengujian, konfigurasi GPT-5.6, Qwen3.6, dan Gemini Robotics dikunci serta dicatat. Catatan memuat identitas versi atau rilis, penyedia dan jenis antarmuka, kapabilitas yang dideklarasikan, prapemrosesan gambar, resolusi efektif, \textit{prompt}, parameter dekode, \textit{runtime}, perangkat keras lokal, dan wilayah atau konfigurasi layanan apabila relevan. Seluruh \textit{backend} pada kondisi antarmuka bersama menggunakan episode, pengendali, batasan keselamatan, kebijakan coba-ulang, dan evaluator yang sama.
 
-Metrik utama mencakup akurasi penambatan, tingkat keberhasilan misi, efisiensi lintasan, tingkat tabrakan, tingkat aksi tidak valid, jumlah intervensi keselamatan, latensi inferensi, dan latensi keputusan ujung-ke-ujung. Analisis adaptasi LoRA dan GRPO dilakukan sebagai kondisi tambahan apabila data pelatihan dan sumber daya komputasi telah tersedia.
+Log per keputusan memuat identitas episode dan manifest, versi anotasi, \texttt{observation\_id}, respons mentah, hasil deserialisasi, aksi kanonis yang diusulkan, usulan peristiwa misi, keputusan gerbang, aksi aktual, keadaan UAV, usia pengamatan, waktu inferensi, waktu keputusan ujung-ke-ujung, dan alasan terminal. Untuk penambatan, log juga menyimpan target prediksi, target acuan, aturan pencocokan, hasil kecocokan instans, dan hasil predikat relasi. Dengan demikian, metrik agregat dapat dihitung ulang dari log mentah.
+
+Akurasi penambatan instans didefinisikan sebagai $A_{\mathrm{inst}}=N^{-1}\sum_{i=1}^{N}\mathbf{1}[p_i=g_i]$ pada semua peluang deklarasi target yang dievaluasi. Akurasi relasi dihitung terpisah pada peluang yang memuat predikat spasial. Tingkat keberhasilan misi adalah proporsi episode yang memenuhi seluruh kondisi terminal berhasil. Tingkat tabrakan adalah proporsi episode yang mengalami sedikitnya satu tabrakan; jumlah tabrakan per keputusan dilaporkan sebagai metrik tambahan. Tingkat aksi tidak valid adalah proporsi respons awal yang gagal diurai, sedangkan kegagalan setelah \textit{prompt} perbaikan dicatat terpisah. Tingkat intervensi keselamatan adalah proporsi aksi kanonis yang dipotong, diganti, atau ditolak. Efisiensi lintasan adalah rasio panjang lintasan referensi yang layak terhadap panjang lintasan aktual untuk episode berhasil, dengan lintasan referensi dibekukan oleh manifest. Latensi inferensi dan latensi ujung-ke-ujung dilaporkan sebagai median, persentil ke-95, dan distribusi per episode.
+
+%-----------------------------------------------------------------------------%
+\section{Eksperimen Adaptasi LoRA dan GRPO}
+\label{sec:lora_grpo_experiment}
+%-----------------------------------------------------------------------------%
+LoRA dan GRPO merupakan tujuan utama penelitian pada \textit{backend} terbuka yang bobotnya dapat diakses. Tiga kondisi dibandingkan: model dasar, model dengan LoRA terawasi, dan model dengan LoRA yang dilanjutkan GRPO. Data pelatihan hanya berasal dari split pelatihan; split pengembangan digunakan untuk memilih hiperparameter; split pengujian yang telah dibekukan tidak digunakan untuk penyetelan maupun \textit{rollout}.
+
+Manifest pelatihan menetapkan data dan versi prompt, lapisan serta peringkat LoRA, kuantisasi, perangkat keras, anggaran token, jumlah \textit{rollout}, kebijakan acuan, dan seed. Penghargaan GRPO terdiri atas komponen keberhasilan misi, kemajuan subtujuan, keamanan, kepatuhan format aksi, dan penalti aksi tidak valid; bobot komponen serta setiap ablasinya dibekukan sebelum pelatihan. Ketiga kondisi dievaluasi dengan manifest episode, pengendali, batas keselamatan, dan metrik yang sama, sehingga perubahan hasil dapat ditafsirkan sebagai efek kondisi adaptasi pada \textit{backend} terbuka yang diuji.

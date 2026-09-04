@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Papers/Meier et al 2011 - PIXHAWK.md",
+                "file": "Paragraphs/B2-06 - ROS 2 dan frame.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Meier et al 2011 - PIXHAWK"
+              "title": "B2-06 - ROS 2 dan frame"
             }
           },
           {
@@ -104,7 +104,7 @@
             "state": {
               "type": "localgraph",
               "state": {
-                "file": "Papers/Meier et al 2011 - PIXHAWK.md",
+                "file": "Paragraphs/B2-06 - ROS 2 dan frame.md",
                 "options": {
                   "collapse-filter": true,
                   "search": "",
@@ -127,7 +127,7 @@
                   "repelStrength": 10,
                   "linkStrength": 1,
                   "linkDistance": 250,
-                  "scale": 1.9262249808976029,
+                  "scale": 3.0155768099416838,
                   "close": false
                 }
               },
@@ -304,33 +304,33 @@
   },
   "active": "72cb3beb19bdc4d7",
   "lastOpenFiles": [
-    "00-Graph-Start.md",
-    "README.md",
-    "00-Citation-Map-Bab-1-2.md",
-    "Chapters/Bab 1 - Pendahuluan.md",
-    "Paragraphs/B1-01 - Keputusan dan lintasan UAV.md",
+    "Paragraphs/B2-12 - AirSim dan CoSyS-AirSim.md",
+    "Papers/Jansen et al 2023 - CoSyS-AirSim.md",
+    "Papers/Shah et al 2017 - AirSim.md",
+    "Paragraphs/B2-11 - GRPO untuk VLM.md",
+    "Paragraphs/B2-10 - LoRA dan QLoRA.md",
+    "Papers/Shen et al 2025 - VLM-R1.md",
+    "Papers/Huang et al 2025 - Vision-R1.md",
+    "Papers/Shao et al 2024 - DeepSeekMath.md",
+    "Papers/Dettmers et al 2023 - QLoRA.md",
+    "Papers/Hu et al 2021 - LoRA.md",
+    "Paragraphs/B2-08 - VLM untuk inspeksi UAV.md",
+    "Papers/Ma 2019 - Self-Monitoring Navigation Agent.md",
+    "Paragraphs/B2-05 - Instruksi multilangkah.md",
+    "Paragraphs/B2-02 - Navigasi geometris dan semantik.md",
+    "Papers/Ayala 2024 - UAV Object-Goal Navigation Review.md",
     "Papers/Vivaldini 2025 - Decision-Making-Based Path Planning for Autonomous UAVs.md",
+    "Paragraphs/B1-01 - Keputusan dan lintasan UAV.md",
+    "Chapters/Bab 1 - Pendahuluan.md",
+    "00-Graph-Start.md",
+    "00-Citation-Map-Bab-1-2.md",
+    "Papers/Meier et al 2011 - PIXHAWK.md",
+    "README.md",
     "Paragraphs/B1-02 - Navigasi tujuan objek UAV.md",
     "Papers/Index Papers.md",
     "Chapters/Bab 2 - Tinjauan Pustaka.md",
     "Chapters",
     "Paragraphs/B2-09 - Navigasi UAV berbasis bahasa.md",
-    "Paragraphs/B2-08 - VLM untuk inspeksi UAV.md",
-    "Paragraphs/B2-07 - Benchmark reproduksibel.md",
-    "Paragraphs/B2-06 - ROS 2 dan frame.md",
-    "Paragraphs/B2-05 - Instruksi multilangkah.md",
-    "Paragraphs/B2-04 - Penalaran spasial.md",
-    "Paragraphs/B2-03 - Model visi bahasa.md",
-    "Paragraphs/B2-02 - Navigasi geometris dan semantik.md",
-    "Paragraphs/B2-01 - UAV dan navigasi otonom.md",
-    "Papers/Zhang et al 2025 - VLM Sky-Ready.md",
-    "Papers/Radford 2021 - CLIP.md",
-    "Papers/Macenski 2022 - ROS 2.md",
-    "Papers/Ayala 2024 - UAV Object-Goal Navigation Review.md",
-    "Papers/Ma 2019 - Self-Monitoring Navigation Agent.md",
-    "Paragraphs/B1-06 - Benchmark UAV.md",
-    "Paragraphs/B1-05 - ROS 2 dan integrasi.md",
-    "Paragraphs/B1-04 - Dasar VLM.md",
     "Paragraphs",
     "Papers"
   ]
