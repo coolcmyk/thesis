@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DroneVL Thesis</title>
+    <style>
+      html, body, #thesis-pdf { width: 100%; height: 100%; margin: 0; border: 0; }
+    </style>
+  </head>
+  <body>
+    <iframe id="thesis-pdf" title="DroneVL thesis"></iframe>
+    <script>
+      document.getElementById("thesis-pdf").src = `out/thesis.pdf?v=${Date.now()}`;
+    </script>
+  </body>
+</html>

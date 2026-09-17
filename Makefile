@@ -54,10 +54,10 @@ serve: pdf
 		$(WATCHEXEC) --postpone --watch thesis.tex --watch settings.tex --watch istilah.tex \
 			--watch singkatan.tex --watch pustaka.bib --watch acknowledgement.txt \
 			--watch src --watch _internals --watch assets -- \
-			$(MAKE) --no-print-directory sync-obsidian && $(COMPILE) & \
+			sh -c '$(MAKE) --no-print-directory sync-obsidian && $(COMPILE)' & \
 		watcher_pid=$$!; \
-		$(BROWSER_SYNC) start --server out --files "out/$(DOCNAME).pdf" \
-			--startPath "$(DOCNAME).pdf" --no-notify
+		$(BROWSER_SYNC) start --server . --files "out/$(DOCNAME).pdf" \
+			--startPath "live-viewer.html" --no-notify
 
 .PHONY: all clean doc mostlyclean pdf serve sync-obsidian sync-obsidian-watch
 

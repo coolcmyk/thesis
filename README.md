@@ -2,7 +2,7 @@
 
 DroneVL is a thesis project on a model-agnostic adapter for semantic UAV navigation in CoSyS-AirSim and ROS 2.
 
-It compares GPT-5.6, Qwen3.6, and Gemini Robotics through one canonical observation/action contract:
+DroneVL has three explicitly separated experiment families: (1) VLM planners---GPT-5.6, Qwen3.6 35B-A3B (`qwen3.6:35b-a3b`), and Gemini Robotics ER 2 with the Streaming Preview variant; (2) VLA portability---CognitiveDrone, UAV-adapted OpenVLA-7B, and UAV-adapted OpenPI $\pi_{0.5}$; and (3) OpenVLA-7B adaptation---base model M0, UAV-adapted LoRA M1, and LoRA+GRPO M2. All use one canonical observation/action contract:
 
 ```text
 model backend → DroneVL adapter → parser + safety gate → fixed flight controller
