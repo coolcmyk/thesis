@@ -1,12 +1,16 @@
-# DroneVL
+# DroneVL: Evaluating GRPO after LoRA-SFT for Instruction-Conditioned UAV Navigation
 
-DroneVL is a thesis project on a model-agnostic adapter for semantic UAV navigation in CoSyS-AirSim and ROS 2.
+DroneVL is a thesis project designed to evaluate OpenVLA-7B and π₀-FAST adaptation for semantic UAV navigation in CoSyS-AirSim. Its main question is whether Group Relative Policy Optimization (GRPO), continued after Low-Rank Adaptation supervised fine-tuning (LoRA-SFT), improves mission success on held-out episodes.
 
-DroneVL has three explicitly separated experiment families: (1) VLM planners---GPT-5.6, Qwen3.6 35B-A3B (`qwen3.6:35b-a3b`), and Gemini Robotics ER 2 with the Streaming Preview variant; (2) VLA portability---CognitiveDrone, UAV-adapted OpenVLA-7B, and UAV-adapted OpenPI $\pi_{0.5}$; and (3) OpenVLA-7B adaptation---base model M0, UAV-adapted LoRA M1, and LoRA+GRPO M2. All use one canonical observation/action contract:
+For each model, the planned study compares M0 (base model with a UAV interface calibrated on training data), M1 (LoRA-SFT), M2 (GRPO continued from M1), and a continued-SFT control starting from the same M1 checkpoint. DroneVL defines the observation and action contracts, controller boundary, safety gate, episode runner, and evaluator. The main comparison is M2 versus M1 within each model; M2 versus continued SFT tests the value of additional supervised optimization.
 
-```text
-model backend → DroneVL adapter → parser + safety gate → fixed flight controller
-```
+UAV-Flow-Sim demonstrations are planned for LoRA-SFT. GRPO rollouts and final evaluation are planned in separate CoSyS-AirSim AirSimNH partitions, making the M2 result an adaptation across simulators rather than zero-shot transfer. Tasks cover primitive flight intents, landmark-relative maneuvers, and held-out compositions of trained maneuvers. Policy inputs are limited to front RGB imagery, instructions, UAV state, and verified progress counts; the π₀-FAST input mapping remains to be implemented. OpenVLA predicts four motion tokens per decision. The planned π₀-FAST path predicts compressed action-chunk tokens, with its UAV processor, tokenizer, and execution horizon still to be specified and validated. Depth is used by the safety gate, while evaluator target identities and coordinates are withheld from the policy.
+
+Evaluation is planned on paired mission episodes, separating episodes from the training distribution from withheld instruction combinations. Mission success is the primary outcome; collisions, safety interventions, efficiency, and learning cost are also reported. Cross-model comparisons include differences in pretraining, input processing, and action representation, so they cannot isolate the effect of tokenization. Final splits, training budgets, seed counts, and test counts remain to be set.
+
+Current evidence covers OpenVLA integration, limited training and inference checks, oracle validation, and initial development missions. Full M1 and M2 training, held-out comparisons, and π₀-FAST UAV integration remain unfinished. The thesis therefore does not yet establish a GRPO benefit.
+
+Experiment implementation: `/home/kyo/ws/robotics/thesis`. Chapter IV and the appendix distinguish documented development evidence from unfinished main experiments. See [the revision audit](research-direction-revision-audit.md) for the rationale behind the revised scope.
 
 The repository contains the LaTeX thesis, bibliography, figures, and linked Obsidian literature notes.
 

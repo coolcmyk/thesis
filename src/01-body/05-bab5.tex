@@ -1,16 +1,21 @@
-%-----------------------------------------------------------------------------%
 \chapter{\babLima}
 \label{cha:penutup}
-%-----------------------------------------------------------------------------%
-
-%-----------------------------------------------------------------------------%
 \section{Kesimpulan}
 \label{sec:kesimpulan}
-%-----------------------------------------------------------------------------%
-Bagian ini akan memuat kesimpulan yang menjawab rumusan masalah berdasarkan hasil eksperimen dan analisis pada Bab~IV.
+Hasil eksperimen utama belum tersedia pada revisi ini. Penelitian belum dapat menyimpulkan apakah GRPO meningkatkan tingkat keberhasilan OpenVLA atau $\pi_0$-FAST dibandingkan M1 setelah LoRA-SFT. Bukti pada Bab~IV masih terbatas pada integrasi, inferensi, demonstrasi awal, dan uji misi pengembangan.
 
-%-----------------------------------------------------------------------------%
+Kesimpulan akhir akan menjawab tiga rumusan masalah untuk setiap model. Jawaban pertama membahas perubahan keberhasilan misi dan kesesuaian intensi dari M0 menjadi M1 setelah LoRA-SFT dari UAV-Flow-Sim. Jawaban kedua membahas kedua ukuran tersebut pada M2 terhadap M1 dan kontrol SFT lanjutan, beserta tabrakan serta intervensi keselamatan. Jawaban ketiga membahas hasil pada kombinasi intensi AirSimNH yang ditahan dari pelatihan.
+
+Setiap jawaban akan memakai hasil uji dan interval ketidakpastian pada Bab~IV. Jika GRPO membantu OpenVLA tetapi tidak membantu $\pi_0$-FAST, atau sebaliknya, perbedaan tersebut tetap dilaporkan. Manfaat yang terbatas pada kondisi tertentu juga menjadi bagian kesimpulan.
+
+Kesimpulan hanya berlaku pada model, demonstrasi UAV-Flow-Sim, konversi aksi, tugas intensi AirSimNH, pengendali, dan gerbang keselamatan yang diuji. M2 menerima rollout pelatihan AirSimNH, sehingga hasilnya mengukur adaptasi setelah SFT lintas simulator dan tidak menunjukkan transfer nol-tembakan. Bantuan kemajuan dari evaluator tetap menjadi bagian kondisi pengujian. Peningkatan keberhasilan atau kesesuaian intensi tidak otomatis membuktikan peningkatan keselamatan. Penelitian ini tidak menetapkan keunggulan GRPO terhadap PPO, VLA terhadap VLM, atau kesiapan penerbangan nyata.
+
 \section{Saran}
 \label{sec:saran}
-%-----------------------------------------------------------------------------%
-Bagian ini akan memuat saran untuk pengembangan DroneVL, perluasan DroneVL Arena, evaluasi model yang lebih beragam, dan penelitian \textit{sim-to-real} pada masa mendatang.
+Pekerjaan berikutnya adalah menyelesaikan konversi dan pemeriksaan partisi UAV-Flow-Sim, menyusun manifest intensi AirSimNH, serta menyelesaikan integrasi UAV $\pi_0$-FAST dan memverifikasi tokenisasi potongan serta probabilitas aksinya. Ambang predikat evaluator dan aturan analisis ditetapkan sebelum set uji dibuka.
+
+Pelatihan dan evaluasi akan diulang sesuai protokol. Kontrol SFT lanjutan perlu diverifikasi pada setiap model. Asal checkpoint M1 harus dapat ditelusuri pada cabang M2 dan kontrol tersebut agar perbandingan dapat ditafsirkan.
+
+Penelitian lanjutan sebaiknya menjawab keterbatasan yang ditemukan melalui hasil uji. Jika GRPO tidak menghasilkan variasi penghargaan, pengujian dapat menilai kemampuan awal M1 atau algoritme alternatif seperti PPO. Jika kesesuaian intensi turun pada komposisi baru, pengujian dapat memisahkan pengaruh cakupan demonstrasi, pengodean intensi, dan bantuan kemajuan evaluator. Panduan ahli di dalam kelompok rollout dapat diuji sebagai kondisi terpisah dari GRPO standar.
+
+Pengujian pada lingkungan berbeda atau penerbangan nyata diperlukan untuk memperluas ruang kesimpulan. Kemampuan tersebut tidak diasumsikan dari hasil simulasi.

@@ -1,17 +1,63 @@
-%-----------------------------------------------------------------------------%
 \chapter{\babEmpat}
 \label{cha:pengujian}
-%-----------------------------------------------------------------------------%
-Bab ini akan menyajikan realisasi implementasi, hasil pengujian DroneVL Arena, dan analisis perbandingan \textit{backend} VLM. Seluruh hasil akan dilaporkan berdasarkan log eksperimen yang dihasilkan oleh evaluator.
+Bab ini memisahkan bukti integrasi dan uji pengembangan dari eksperimen utama. Pada revisi ini, hasil pelatihan penuh M1 dan M2 belum tersedia untuk OpenVLA maupun $\pi_0$-FAST. Hasil perbandingan pada set uji yang telah ditetapkan juga belum tersedia. Bagian berikut menjelaskan bukti yang sudah tercatat dan rencana pelaporan hasil utama.
 
-%-----------------------------------------------------------------------------%
-\section{Realisasi Eksperimen dan Pengolahan Data}
+\section{Realisasi Sistem dan Bukti Pengembangan}
 \label{sec:realisasi_eksperimen}
-%-----------------------------------------------------------------------------%
-Bagian ini akan memaparkan konfigurasi simulator, implementasi adaptor, konfigurasi model, episode yang digunakan, serta prosedur pengolahan log eksperimen.
+Peninjauan repositori eksperimen pada 6 November 2026 menemukan komponen adaptasi pada jalur OpenVLA. Komponen tersebut mencakup dekoder empat-dimensi, loss SFT token aksi, dan GRPO yang melanjutkan LoRA M1 dengan acuan tetap. Catatan pengembangan memuat uji inferensi pada citra tersimpan, pemeriksaan oracle, dan uji misi awal. Komponen evaluasi intensi serta konversi UAV-Flow-Sim ke format aksi DroneVL belum menjadi bukti eksperimen utama. Keberhasilan komponen yang sudah tersedia belum membuktikan keberhasilan misi kebijakan terlatih.
 
-%-----------------------------------------------------------------------------%
-\section{Hasil dan Analisis}
-\label{sec:hasil_analisis}
-%-----------------------------------------------------------------------------%
-Bagian ini akan menyajikan hasil penambatan visual, penalaran spasial, pencarian objek, navigasi semantik, dan instruksi multilangkah. Analisis akan membahas keberhasilan misi, keselamatan, efisiensi lintasan, keluaran tidak valid, penggunaan sumber daya, dan latensi.
+Catatan 13 Oktober 2026 melaporkan satu pembaruan LoRA pada enam aksi pengembangan. Inferensi statis kemudian dijalankan pada hasil pembaruan tersebut. Uji ini memeriksa jalur pelatihan dan inferensi, bukan kemampuan M1 setelah pelatihan penuh.
+
+Catatan 3 November melaporkan lima uji pengembangan OpenVLA M0. Model menghasilkan 60 respons, dan 59 aksi dieksekusi. Tidak ada misi yang berhasil. Pengujian memakai arena dan anggaran pengembangan, sehingga tidak menjadi estimasi hasil eksperimen utama. Hasil ini juga belum menjawab apakah GRPO dapat memperbaiki kebijakan setelah SFT.
+
+Catatan 5 November melaporkan keberhasilan oracle pada lima belas episode kinematik arena v2. Selanjutnya, oracle menyelesaikan lima episode pelatihan pada AirSimNH dengan rendering dan menghasilkan 42 sampel demonstrasi. Varian pengembangan serta pratinjau uji lainnya baru memiliki pemeriksaan kinematik pada catatan tersebut.
+
+Keberhasilan oracle memeriksa eksekusi dan penilaian episode. Jumlah 42 sampel adalah data pengembangan awal, bukan dataset utama SFT yang direncanakan. Konversi dan validasi partisi UAV-Flow-Sim masih harus dilakukan sebelum pelatihan utama. Lampiran~\ref{app:provenance} mencatat sumber dokumen dan batas buktinya.
+
+Integrasi UAV $\pi_0$-FAST masih direncanakan. Belum ada hasil inferensi UAV, LoRA-SFT, atau GRPO lokal untuk model tersebut. Catatan inferensi OpenPI $\pi_{0.5}$ tidak menjadi bukti inferensi $\pi_0$-FAST karena keluaran dan lingkungan eksekusinya berbeda.
+
+\section{Konfigurasi Eksperimen Utama}
+\label{sec:konfigurasi_utama}
+Konfigurasi akhir akan melaporkan versi dan partisi demonstrasi UAV-Flow-Sim, prosedur konversi koordinat dan aksi, manifest tugas intensi AirSimNH, checkpoint, tokenizer, seed, dan anggaran. Catatan realisasi juga akan memuat parameter LoRA, ambang evaluator untuk setiap predikat intensi, serta aturan pemilihan checkpoint setiap model.
+
+Tabel realisasi akan melaporkan jumlah episode dan sampel pada setiap set. Tabel juga akan mencatat kombinasi instruksi uji, biaya pelatihan, horizon prediksi, dan horizon eksekusi. Setiap penyimpangan dari Bab~III akan dijelaskan. Nilai pengembangan tidak dilaporkan sebagai konfigurasi akhir tanpa bukti pelaksanaan.
+
+\section{Hasil Adaptasi Terawasi}
+\label{sec:hasil_sft}
+Pengujian adaptasi terawasi akan membandingkan tingkat keberhasilan dan skor kesesuaian intensi M1 dengan M0 secara terpisah untuk OpenVLA dan $\pi_0$-FAST. Episode AirSimNH akan dipasangkan antarkondisi. Hasil per seed akan disertai capaian gerak primitif dan interaksi landmark, penyelesaian subtujuan, aksi tidak valid, tabrakan, dan intervensi keselamatan. M1 di AirSimNH mengukur transfer awal dari demonstrasi UAV-Flow-Sim sebelum rollout GRPO.
+
+Interpretasi M0 akan memperhatikan kalibrasi antarmuka UAV yang dilakukan pada setiap model. Loss SFT akan digunakan sebagai diagnostik pelatihan. Kemampuan navigasi tetap dinilai melalui episode penerbangan.
+
+\section{Manfaat Tambahan GRPO}
+\label{sec:hasil_grpo}
+Pengujian GRPO akan membandingkan M2 dengan M1 dan kontrol SFT lanjutan dalam model yang sama. Hasil utama mencakup tingkat keberhasilan misi dan skor kesesuaian intensi; selisih masing-masing akan dilaporkan dalam poin persentase atau skala skor, disertai interval ketidakpastian, jumlah pasangan episode, dan jumlah seed pelatihan.
+
+Tabel hasil akan memisahkan $\Delta_{\mathrm{OpenVLA}}$ dan $\Delta_{\pi_0\text{-FAST}}$. Perubahan tabrakan dan intervensi keselamatan akan ditampilkan bersama perubahan tingkat keberhasilan. Jika M2 lebih sering berhasil tetapi lebih bergantung pada gerbang keselamatan, pembahasan akan menjelaskan kedua hasil tersebut.
+
+Hasil negatif tetap dilaporkan jika M2 tidak melampaui M1 atau kontrol SFT lanjutan. Peningkatan M2 terhadap M0 saja belum menunjukkan manfaat GRPO karena M1 sudah menerima pelatihan UAV. Seluruh angka hasil akan diambil dari log eksperimen yang tersedia.
+
+\section{Generalisasi Kombinasi Instruksi}
+\label{sec:hasil_generalisasi}
+Pengujian generalisasi akan memisahkan episode ID dari kombinasi intensi yang tidak digunakan untuk pelatihan. Contohnya adalah urutan baru yang menggabungkan pendekatan, lintasan melewati landmark, orbit, atau hover, sementara keterampilan penyusunnya sudah muncul dalam pelatihan. Tingkat keberhasilan dan kesesuaian intensi dilaporkan bersama. Daftar kombinasi akhir mengikuti manifest pada Bab~III.
+
+Tabel per model dan keluarga misi akan membandingkan M2 dengan M1 pada tingkat keberhasilan dan kesesuaian intensi. Variasi tata ruang dan parafrasa instruksi, jika diuji, dilaporkan terpisah dari komposisi keterampilan. Hasil AirSimNH tidak digunakan untuk menyimpulkan kemampuan pada kategori objek, cuaca, atau lingkungan nyata yang baru.
+
+\section{Perilaku Pembelajaran, Biaya, dan Kegagalan}
+\label{sec:analisis_pembelajaran}
+Kurva pengembangan akan menunjukkan tingkat keberhasilan terhadap langkah lingkungan dan waktu GPU. Analisis juga akan memuat kelompok dengan penghargaan seragam, rollout tanpa sinyal relatif, serta jumlah pembaruan efektif. Biaya pengumpulan yang tidak menghasilkan pembaruan tetap dilaporkan.
+
+Analisis kegagalan akan membedakan salah landmark, sisi lintasan atau arah orbit yang keliru, kegagalan mempertahankan jarak/posisi, salah urutan, dan gerak tidak layak. Ketergantungan pada intervensi keselamatan serta gangguan infrastruktur dicatat terpisah. Frekuensi kategori dihitung dari seluruh episode yang relevan. Video hanya digunakan sebagai ilustrasi kasus.
+
+Ablasi akan dipilih untuk menguji penjelasan tertentu. Contohnya adalah pengaruh penalti intervensi keselamatan atau kemampuan awal M1 terhadap pembelajaran GRPO. Ablasi yang belum dilakukan tidak digunakan untuk mendukung penjelasan mekanisme. Penghargaan pelatihan tidak disetel berulang berdasarkan set uji.
+
+\section{Perbandingan Antarmodel}
+\label{sec:hasil_antarmodel}
+Perbandingan OpenVLA dan $\pi_0$-FAST akan melaporkan tingkat keberhasilan M1 dan M2 serta tambahan manfaat GRPO pada setiap model. Latensi, memori, biaya, dan horizon eksekusi juga akan dilaporkan. Episode serta batas fisik yang sama menjadi dasar perbandingan.
+
+Jumlah token dan loss mentah tidak dianggap setara antarmodel karena kosakata serta panjang keluarannya berbeda. Hasil akan ditafsirkan sebagai perbandingan dua sistem kebijakan. Perbandingan ini tidak mengisolasi pengaruh kausal tokenisasi FAST terhadap binning OpenVLA.
+
+\section{Pembahasan dan Batas Interpretasi}
+\label{sec:pembahasan}
+Pembahasan akhir akan menempatkan hasil M2 terhadap M1 dan kontrol SFT lanjutan dalam literatur RL setelah SFT. Persamaan dan perbedaan hasil akan dijelaskan tanpa mengulang seluruh angka tabel. Representasi aksi, kemampuan awal M1, dan bantuan evaluator merupakan kemungkinan penjelasan. Ketiganya tidak disebut sebagai mekanisme terbukti tanpa analisis pembeda.
+
+Kesimpulan dibatasi pada dua model, demonstrasi UAV-Flow-Sim, tugas intensi dan landmark di AirSimNH, bantuan kemajuan terverifikasi, serta gerbang keselamatan tetap. Simulator dijeda selama inferensi. Karena M2 menerima rollout AirSimNH, hasilnya mengukur adaptasi dari SFT lintas simulator dan bukan transfer nol-tembakan. Hasilnya tidak membuktikan keunggulan universal GRPO, kendali asinkron selama penerbangan, atau kesiapan dunia nyata.

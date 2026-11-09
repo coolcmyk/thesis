@@ -1,77 +1,268 @@
-%-----------------------------------------------------------------------------%
 \chapter{\babTiga}
 \label{cha:metodologi}
-%-----------------------------------------------------------------------------%
-Bab ini menjelaskan metodologi penelitian dan rancangan sistem DroneVL. Rancangan memisahkan inferensi VLM atau VLA yang bergantung pada \textit{backend} dari komponen navigasi yang dibekukan pada seluruh kondisi eksperimen. Spesifikasi berikut menjadi acuan implementasi, pencatatan, dan evaluasi; setiap nilai konfigurasi yang belum bersifat universal dibekukan dalam manifest eksperimen sebelum pengujian dimulai.
+Bab ini menjelaskan rancangan adaptasi OpenVLA dan $\pi_0$-FAST untuk UAV. Prosedur yang sudah tersedia dipisahkan dari rencana eksperimen utama. Nilai konfigurasi pengembangan belum menjadi hiperparameter akhir. Peningkatan kemampuan akan dinilai setelah pelatihan dan pengujian selesai.
 
-%-----------------------------------------------------------------------------%
-\section{Desain Penelitian}
+\section{Desain Penelitian dan Hipotesis}
 \label{sec:desain_penelitian}
-%-----------------------------------------------------------------------------%
-Penelitian menggunakan pendekatan rekayasa sistem dan evaluasi eksperimental. Artefak yang dibangun meliputi DroneVL sebagai adaptor untuk VLM dan VLA, serta DroneVL Arena sebagai kerangka evaluasi \textit{closed-loop}. Evaluasi membedakan dua kondisi. Kondisi antarmuka bersama menyetarakan episode, sensor yang diizinkan, resolusi masukan, riwayat, \textit{prompt}, frekuensi keputusan, batas waktu, kebijakan coba-ulang, pengendali, dan evaluator sejauh didukung semua \textit{backend}. Kondisi kapabilitas asli mencatat konfigurasi terbaik yang sah bagi setiap \textit{backend}; hasilnya dilaporkan terpisah dan tidak ditafsirkan sebagai pengaruh model semata.
+Penelitian dirancang untuk membandingkan tahap adaptasi pada OpenVLA dan $\pi_0$-FAST. Pada setiap model, M2 akan dibandingkan dengan M1 dan kontrol SFT lanjutan. Hipotesis utama menyatakan bahwa GRPO meningkatkan tingkat keberhasilan misi uji dibandingkan M1. Hasil dapat menunjukkan peningkatan, penurunan, atau manfaat yang terbatas pada keluarga misi tertentu.
 
-Eksperimen dibagi menjadi tiga keluarga. Eksperimen VLM membandingkan GPT-5.6, Qwen3.6 35B-A3B, dan Gemini sebagai perencana semantik. Eksperimen portabilitas VLA membandingkan CognitiveDrone, OpenVLA-7B yang diadaptasi untuk UAV, dan OpenPI $\pi_{0.5}$ yang diadaptasi untuk UAV. Eksperimen utama adaptasi membandingkan model dasar OpenVLA-7B (M0), OpenVLA-7B dengan LoRA yang diadaptasi untuk UAV (M1), dan M1 yang dilanjutkan GRPO (M2). Hasil ketiga keluarga dilaporkan terpisah; perbandingan lintas keluarga hanya bersifat deskriptif karena representasi aksi dan riwayat pelatihan berbeda.
+Model dinyatakan dengan indeks $b\in\{\mathrm{OpenVLA},\pi_0\text{-FAST}\}$. Notasi $M_{0,b}$, $M_{1,b}$, dan $M_{2,b}$ menunjukkan tahap adaptasi pada model tersebut. Bentuk singkat M0, M1, dan M2 merujuk pada model yang sedang dibahas. Di dalam setiap model, bobot dasar, representasi aksi, pembangun pengamatan, pengendali, gerbang keselamatan, dan evaluator dibuat tetap antartahapan.
 
-Setiap episode memiliki pasangan percobaan yang sama di dalam keluarga eksperimen yang relevan. Kesamaan jalur hilir mengendalikan perubahan pengendali dan skenario, tetapi tidak menghapus perbedaan bawaan seperti modalitas, panjang konteks, atau latensi layanan. Karena itu, konfigurasi efektif dan kehilangan informasi akibat normalisasi dicatat bersama hasil eksperimen.
+Tabel~\ref{tab:kondisi_adaptasi} menjelaskan empat kondisi per model. Setiap kondisi menggunakan dekoder dan tokenizer UAV yang sama dalam model tersebut. Kalibrasi hanya memakai data pelatihan. OpenVLA dan $\pi_0$-FAST tetap memiliki kosakata serta dekoder token berbeda.
 
-%-----------------------------------------------------------------------------%
-\section{Rancangan Arsitektur DroneVL}
-\label{sec:rancangan_dronevl}
-%-----------------------------------------------------------------------------%
-Arsitektur terdiri atas komponen pembentuk pengamatan, adaptor \textit{backend}, pengurai respons, pengelola misi, gerbang keselamatan, pengendali tingkat rendah, dan pencatat eksperimen. Alur representasi dibekukan sebagai berikut: \textit{CanonicalObservation} $\rightarrow$ permintaan khusus-\textit{backend} $\rightarrow$ respons mentah dan metadata $\rightarrow$ hasil deserialisasi khusus-\textit{backend} $\rightarrow$ aksi kanonis atau usulan peristiwa misi $\rightarrow$ keputusan keselamatan $\rightarrow$ aksi aktual. Adaptor hanya bertanggung jawab atas dua tahap khusus-\textit{backend}; pengurai memiliki satu tanggung jawab untuk membentuk representasi kanonis dan melaporkan kegagalan penguraian.
+\begin{table}[htbp]
+\centering
+\caption{Kondisi adaptasi yang diterapkan pada OpenVLA dan $\pi_0$-FAST secara terpisah.}
+\label{tab:kondisi_adaptasi}
+\small
+\begin{tabularx}{\linewidth}{|p{2.1cm}|X|X|}
+\hline
+\textbf{Kondisi} & \textbf{Parameter dan pelatihan} & \textbf{Tujuan perbandingan} \\
+\hline
+M0 & Bobot dasar tetap; dekoder UAV terkalibrasi pada partisi pelatihan UAV-Flow-Sim. & Acuan sebelum SFT UAV. \\
+\hline
+M1 & M0 dengan pembaruan LoRA melalui SFT demonstrasi UAV-Flow-Sim. & Manfaat adaptasi terawasi. \\
+\hline
+SFT lanjutan & Melanjutkan M1 menggunakan objektif SFT pada data UAV-Flow-Sim dari partisi pelatihan. & Alternatif tambahan optimisasi terawasi. \\
+\hline
+M2 & Melanjutkan parameter LoRA M1 dengan GRPO pada rollout AirSimNH dari partisi pelatihan. & Manfaat tambahan pembelajaran dari hasil penerbangan. \\
+\hline
+\end{tabularx}
+\end{table}
+M0 menjadi acuan sebelum SFT UAV, tetapi antarmukanya telah menerima kalibrasi dari partisi pelatihan UAV-Flow-Sim. M1 adalah hasil LoRA-SFT. M2 dan kontrol SFT lanjutan dimulai dari \textit{checkpoint} M1 yang sama untuk setiap pengulangan pelatihan. Checkpoint adalah salinan parameter model yang disimpan pada tahap pelatihan tertentu. GRPO kemudian beradaptasi melalui interaksi AirSimNH; karena itu, evaluasi M2 mengukur hasil adaptasi lintas simulator, bukan transfer nol-tembakan.
 
-Pada jalur eksperimen VLM, GPT-5.6, Qwen3.6 35B-A3B, dan Gemini hanya terhubung ke jalur penerbangan melalui DroneVL Model Adapter. GPT-5.6 menggunakan antarmuka API gambar--teks, Qwen3.6 35B-A3B menggunakan antarmuka gambar--teks dengan arsitektur \textit{mixture-of-experts} (MoE) multimodal, sedangkan Gemini menggunakan Live API dua arah untuk menerima konteks multimodal dan mengembalikan teks atau pemanggilan fungsi. Respons \textit{streaming} tersebut tidak diteruskan langsung ke UAV; respons harus dihimpun pada batas keputusan, dideserialisasi, lalu dinormalisasi menjadi aksi tingkat tinggi yang dibatasi atau ditolak sebelum memasuki gerbang keselamatan.
+Anggaran tambahan akan dilaporkan melalui jumlah pembaruan optimizer, paparan data, langkah lingkungan, dan waktu GPU (\textit{graphics processing unit}). Jumlah pembaruan yang sama belum menyetarakan informasi pelatihan karena GRPO menerima interaksi baru. Klaim efisiensi akan dibatasi pada sumber daya yang benar-benar dibandingkan.
 
-Jalur VLA menggunakan kontrak pengamatan kanonis yang sama, tetapi adaptor VLA juga membaca deskriptor perwujudan. Deskriptor tersebut memuat skema aksi, satuan, kerangka koordinat, horizon, dan versi \textit{checkpoint}. CognitiveDrone, OpenVLA-7B yang diadaptasi untuk UAV, dan OpenPI $\pi_{0.5}$ yang diadaptasi untuk UAV mengembalikan \textit{NativeActionEnvelope} berversi. Adaptor mendeserialisasi amplop tersebut ke kandidat aksi kanonis, tanpa meneruskan aksi asli langsung ke UAV.
+Eksperimen utama mencakup dua model dengan empat kondisi per model. Evaluasi VLM, VLA lain, dan PPO berada di luar rancangan ini. Hasilnya tidak digunakan untuk menyimpulkan keunggulan terhadap kelompok tersebut.
 
-OpenVLA-7B menggunakan token aksi UAV yang dipelajari dari split pelatihan. OpenPI $\pi_{0.5}$ menggunakan potongan aksi UAV kontinu yang didekode per horizon, sedangkan CognitiveDrone menggunakan skema aksi empat-dimensi yang ditetapkan dalam manifest. Semua kandidat selanjutnya melewati pengurai dan gerbang keselamatan yang sama.
+\section{Formulasi Tugas dan Batas Informasi}
+\label{sec:formulasi_tugas}
+Pada setiap keputusan, model menerima citra, instruksi, keadaan UAV, dan kemajuan misi. Model menghasilkan token yang didekode menjadi usulan gerak. Gerbang keselamatan memproses usulan tersebut untuk menentukan aksi aktual. Sistem menjalankan aksi sesuai horizon eksekusi, lalu simulator menghasilkan pengamatan berikutnya. Horizon menyatakan cakupan gerak yang diprediksi atau dijalankan sebelum keputusan berikutnya.
 
-Perbedaan bentuk masukan dan keluaran ketiga model sebelum normalisasi menjadi objek pencatatan pada lapisan adaptor, bukan alasan untuk mengubah pengendali, evaluator, atau aturan terminal.
+Keadaan simulator pada keputusan ke-$t$ dinyatakan sebagai $s_t$. Konteks kebijakan adalah $h_t=(I_t,\mathcal I,q_t,m_t)$. Citra RGB depan dinyatakan sebagai $I_t$, instruksi sebagai $\mathcal I$, keadaan UAV yang diizinkan sebagai $q_t$, dan hitungan kemajuan sebagai $m_t$.
 
-\subsection{Kontrak Pengamatan \textit{CanonicalObservation}}
+Keluaran model berupa urutan token $\mathbf y_t$ dengan panjang valid $K_{b,t}$. OpenVLA mendekodenya menjadi satu vektor gerak $a_t=(\Delta x,\Delta y,\Delta z,\Delta\psi)$. $\pi_0$-FAST dirancang menghasilkan potongan dengan bentuk $H_{\mathrm{pred},b}\times4$. Sistem hanya melaksanakan bagian sesuai horizon $H_{\mathrm{exec},b}$ yang ditetapkan dalam manifest episode. Manifest adalah berkas yang menyimpan kondisi dan aturan episode.
+
+Gerbang keselamatan menghasilkan aksi aktual $\tilde a_t$ dari aksi usulan. Trajektori $\tau$ mencatat konteks, aksi usulan, intervensi keselamatan, dan akibat eksekusi hingga episode berakhir. Catatan ini menjadi dasar evaluasi serta penghargaan pelatihan.
+
+\subsection{Pengamatan Efektif Kebijakan}
 \label{subsec:canonical_observation}
-Setiap keputusan menerima \texttt{CanonicalObservation} berversi yang sedikitnya memuat \texttt{schema\_version}, \texttt{episode\_id}, \texttt{decision\_id}, waktu simulator, waktu dinding, dan cap waktu penangkapan sensor. Isinya terdiri atas citra RGB depan; kedalaman terdaftar beserta satuan dan kerangka koordinat kamera; keadaan UAV yang memuat pose, kecepatan, dan orientasi; instruksi; serta ringkasan kemajuan misi yang dihasilkan pengelola misi. Manifest menentukan resolusi, pemotongan, normalisasi, usia maksimum frame, frekuensi keputusan, dan cara riwayat dipadatkan.
+\texttt{CanonicalObservation} menyimpan data pengamatan dan identitas keputusan. Isinya mencakup waktu simulator, waktu dinding, cap waktu sensor, RGB, kedalaman, keadaan UAV, instruksi, dan kemajuan. Model hanya menerima bidang yang diizinkan dalam konfigurasi masukan.
 
-Segmentasi instans, label objek, transformasi objek, serta anotasi target tidak berada dalam \texttt{CanonicalObservation}. Data tersebut hanya dapat dibaca pembangun manifest, \textit{baseline} oracle, dan evaluator melalui kanal oracle terpisah. Pembangun pengamatan mengunci pasangan RGB, kedalaman, dan odometri pada waktu simulator yang sama; frame yang melampaui usia maksimum dibuang, bukan dikirimkan ke \textit{backend}.
+Implementasi OpenVLA mengirim citra RGB melalui pemroses masukan model. Keadaan dan kemajuan diserialisasi sebagai teks JSON (\textit{JavaScript Object Notation}) dengan urutan tetap. Templat masukan OpenVLA adalah sebagai berikut.
+\begin{quote}
+\small
+\texttt{In: What UAV action should be taken to}\newline
+\texttt{\{instruction\}? State: \{state\_json\}.}\newline
+\texttt{Progress: \{progress\_json\}. Out:}
+\end{quote}
+Jeda baris di atas hanya membantu penyajian. Manifest menyimpan templat persis, token awalan aksi, resolusi, pemotongan citra, dan versi pemroses masukan. Bidang kemajuan berisi jumlah subtujuan selesai dan jumlah total.
 
-\subsection{Kontrak Aksi dan Peristiwa Misi}
-\label{subsec:canonical_action}
-Aksi kendali kanonis memuat \texttt{action\_type}, \texttt{observation\_id}, \texttt{sequence\_id}, \texttt{valid\_until}, dan parameter bernilai hingga. \texttt{MOVE\_RELATIVE} memuat perpindahan $(\Delta x,\Delta y,\Delta z)$ dalam meter pada kerangka badan UAV yang dinyatakan manifest; \texttt{ROTATE\_YAW} memuat perubahan yaw dalam radian; \texttt{HOVER\_AND\_OBSERVE} memuat durasi terbatas; dan \texttt{ABORT} tidak memiliki parameter gerak. Satu konversi kerangka dari aksi kanonis ke perintah pengendali dilakukan pada batas pengendali, sehingga adaptor tidak dapat melakukan transformasi koordinat tambahan.
+Kedalaman hanya digunakan oleh gerbang keselamatan. OpenVLA tidak menerimanya sebagai citra kedua. Label instans, identitas internal target, pose inspeksi acuan, dan koordinat sasaran tidak masuk ke konteks kebijakan.
 
-\texttt{DECLARE\_TARGET} dan \texttt{ADVANCE\_SUBGOAL} bukan aksi kendali. Keduanya adalah usulan peristiwa misi yang memuat identitas atau predikat yang diklaim; pengelola misi memverifikasi usulan terhadap kondisi episode dan kanal oracle evaluator sebelum mengubah keadaan misi. Penolakan usulan dicatat sebagai kegagalan semantik, bukan sebagai kegagalan pengendali.
+Masukan $\pi_0$-FAST akan dipetakan melalui pemroses model yang dipilih. Pengodean keadaan dan teks kemajuannya akan didokumentasikan terpisah dari templat OpenVLA. Daftar bidang, resolusi efektif, masukan pengganti kamera bila diperlukan, dan panjang konteks akan ditetapkan sebelum pelatihan. Kedua model tidak menerima kamera atau target oracle tambahan pada kondisi utama. Integrasi masukan UAV $\pi_0$-FAST belum selesai pada revisi ini.
 
-Pengurai memeriksa skema, bidang wajib, tipe data, nilai numerik berhingga, rentang aksi, cap waktu, dan legalitas aksi pada keadaan misi saat ini. Satu \textit{prompt} perbaikan dapat digunakan untuk respons tidak valid. Setelah $N_{\mathrm{parse}}$ kegagalan penguraian berturut-turut, dengan nilai yang dibekukan dalam manifest, episode diakhiri dengan \texttt{PARSE\_FAILURE}; penghitung hanya direset oleh aksi kanonis yang valid.
+\subsection{Penilaian Subtujuan dan Bantuan Kemajuan}
+\label{subsec:mission_feedback}
+Evaluator mengakses target dan anotasi untuk memeriksa pose inspeksi, yaw, durasi bertahan, relasi, serta urutan subtujuan. Pengelola misi menerima hasil verifikasi terbatas untuk memperbarui hitungan kemajuan. Kebijakan menerima hitungan tersebut pada keputusan berikutnya. Pengujian multilangkah ini menilai navigasi dengan bantuan kemajuan, bukan pemantauan kemajuan yang sepenuhnya mandiri.
 
-Untuk VLA, \textit{NativeActionEnvelope} wajib memuat \texttt{action\_schema\_version}, \texttt{checkpoint\_id}, \texttt{native\_action}, \texttt{coordinate\_frame}, \texttt{unit}, dan \texttt{horizon}. Pemetaan ke \texttt{MOVE\_RELATIVE}, \texttt{ROTATE\_YAW}, \texttt{HOVER\_AND\_OBSERVE}, atau \texttt{ABORT} ditetapkan per \textit{backend} dalam manifest dan diuji pada split pengembangan. Tidak ada pemetaan implisit dari aksi sendi robot, gripper, atau ruang aksi manipulasi ke aksi UAV. Apabila skema, \textit{checkpoint}, atau pemetaan tidak cocok, respons ditolak sebagai \texttt{VLA\_SCHEMA\_FAILURE} dan tidak dieksekusi.
+Predikat evaluator didefinisikan sebelum pengujian. Perintah melewati sisi tertentu dinilai dari tanda offset lateral saat UAV melintasi bidang landmark; orbit dinilai dari arah dan besar perubahan sudut relatif terhadap landmark; perintah mendekati dan bertahan dinilai dari masuk serta durasi di dalam rentang jarak dan posisi yang ditetapkan. Nilai ambang disimpan dalam manifest dan diperiksa dengan trajektori oracle sebelum digunakan.
 
-%-----------------------------------------------------------------------------%
-\section{Rancangan Lingkungan DroneVL Arena}
+Kedua model dibatasi pada gerak UAV empat-dimensi setelah dekode. Model tidak diminta menghasilkan token \texttt{DECLARE\_TARGET} atau \texttt{ADVANCE\_SUBGOAL}. Evaluator menilai pencapaian inspeksi dari trajektori. Pemilihan target dinilai melalui instans yang diinspeksi dan urutan inspeksi aktual. Akurasi deklarasi bahasa tidak menjadi metrik utama, dan waypoint oracle tidak menggantikan prediksi model.
+
+\section{Representasi Aksi dan Kalibrasi M0}
+\label{sec:aksi_uav}
+\subsection{OpenVLA: Token Gerak per Dimensi}
+Representasi \texttt{delta4} memuat perpindahan dalam meter dan perubahan yaw dalam radian. Perpindahan menggunakan kerangka badan depan--kanan--bawah atau \textit{forward--right--down} (FRD). Dekoder memakai rentang aksi UAV, bukan statistik normalisasi manipulasi.
+
+Implementasi OpenVLA menghitung batas normalisasi dari kuantil 0,01 dan 0,99 data aksi pelatihan. Dimensi konstan diberi rentang minimum yang dinyatakan secara eksplisit. Rentang tersebut dibuat tetap untuk M0, M1, kontrol SFT lanjutan, dan M2.
+
+Setiap komponen dinormalisasi ke $[-1,1]$ dan dipotong pada batas rentang. Komponen kemudian diubah menjadi token dengan konvensi diskret 256-bin OpenVLA. Kosakata dasar berisi 32.000 token. Generasi dibatasi pada himpunan token aksi yang diizinkan dekoder, dengan empat token per keputusan. Aturan tepi bin, pusat dekode, dan identitas tokenizer dicatat karena memengaruhi pembulatan aksi.
+
+Perangkat lunak membungkus aksi hasil dekode dalam amplop berversi. Amplop memuat identitas checkpoint, satuan, kerangka koordinat, dan horizon. Token merupakan keluaran model, sedangkan amplop merupakan keluaran pembungkus perangkat lunak. Kalibrasi dekoder tidak dianggap sebagai pelatihan kepala aksi baru.
+
+Pengendali mengonversi gerak pada satu batas sistem. Manifest episode menetapkan horizon, batas perpindahan, toleransi, dan aturan penyelesaian gerak. Pemetaan gerak simultan serta yaw akan dicatat sebelum evaluasi utama. Pemetaan tersebut tidak disetel berdasarkan hasil set uji.
+
+\subsection{$\pi_0$-FAST: Token Potongan Gerak}
+\label{subsec:fast_action}
+Jalur $\pi_0$-FAST dirancang untuk mempertahankan keluaran token rangkaian aksi. Demonstrasi UAV dibentuk menjadi potongan $H_{\mathrm{pred},b}\times4$ sesuai periode pengambilan sampel. Tokenizer FAST memetakan potongan tersebut menjadi token dengan panjang yang dapat bervariasi. Dekoder kemudian merekonstruksi rangkaian gerak \citep{pertsch2025fast}. Keluaran FAST tidak dipotong menjadi empat token OpenVLA.
+
+Manifest akan menetapkan dimensi pengisi atau \textit{padding}, normalisasi, panjang potongan, dan token akhir. Manifest juga mencatat apakah tokenizer memakai versi dasar atau hasil kalibrasi. Checkpoint dasar dan konfigurasi tokenizer UAV $\pi_0$-FAST belum ditetapkan.
+
+$M_{0,\pi_0\text{-FAST}}$ dirancang memakai bobot dasar sebelum UAV LoRA-SFT, dengan antarmuka aksi yang disiapkan dari data pelatihan. Jika perubahan kosakata memerlukan pelatihan parameter tambahan, proses tersebut dilaporkan sebagai kalibrasi terlatih dan definisi M0 disesuaikan. Statistik atau token manipulasi tidak diterjemahkan secara implisit menjadi gerak UAV.
+
+\subsection{Horizon Eksekusi dan Kesetaraan Fisik}
+Jumlah token tidak digunakan sebagai anggaran gerak bersama. Satu token OpenVLA dan satu token FAST tidak memiliki makna fisik yang setara. Horizon prediksi dan horizon eksekusi akan dicatat terpisah pada setiap model.
+
+Konfigurasi bersama dirancang untuk menyetarakan durasi eksekusi sebelum pengamatan berikutnya, periode pengambilan sampel, batas perpindahan, batas kecepatan, dan waktu misi. Jika kesetaraan tersebut tidak tercapai, perbandingan akan diberi label kondisi eksekusi berbeda. Hasilnya tidak ditafsirkan sebagai pengaruh model saja.
+
+Seluruh token aksi valid dari potongan FAST akan direkam. Catatan juga memuat bagian prediksi yang tidak dieksekusi sebelum perencanaan ulang. Optimisasi menggunakan keluaran token penuh yang menghasilkan keputusan. Token tidak dipilih kembali berdasarkan penghargaan yang diperoleh. Frekuensi pengamatan dan horizon dibuat tetap antara M1 dan M2 pada model yang sama. Prosedur ini masih perlu divalidasi dalam lingkungan eksekusi UAV.
+
+\section{Lingkungan, Demonstrasi, dan Partisi}
 \label{sec:rancangan_arena}
-%-----------------------------------------------------------------------------%
-Setiap episode DroneVL Arena didefinisikan oleh manifest berversi yang memuat identitas dan versi adegan, \textit{seed}, pose awal, instruksi, target, kondisi lingkungan, anggaran waktu dan keputusan, batasan keselamatan, kondisi terminal, serta anotasi \textit{ground truth}. Setiap episode menerima satu atau lebih label kemampuan: penambatan visual, penalaran spasial, pencarian objek, navigasi semantik, dan instruksi multilangkah. Hasil dilaporkan menurut hasil misi akhir dan menurut label kemampuan; satu episode multikemampuan tidak dipaksa masuk ke satu kategori eksklusif.
+\subsection{Arena Pengembangan dan Validasi}
+UAV-Flow membedakan perintah gerak primitif dari perintah interaksi objek, termasuk translasi, rotasi, hover, pendekatan, orbit, dan lintasan melewati objek \citep{wang2025uavflow}. DroneVL menggunakan taksonomi tersebut untuk menyusun tugas niat penerbangan di AirSimNH. Blocks tetap digunakan untuk pemeriksaan integrasi dasar.
 
-Manifest membedakan split pelatihan, pengembangan, dan pengujian. Split pengujian dibekukan sebelum penyetelan dan dipisahkan dari pelatihan maupun pengembangan berdasarkan tata ruang, instans objek, komposisi instruksi, dan kondisi visual. Keberhasilan misi memerlukan pemenuhan target, predikat relasi bila ada, urutan subtujuan, toleransi pose, dan durasi bertahan yang ditetapkan oleh manifest. Untuk relasi spasial, evaluator memeriksa kecocokan instans target dan predikat pose secara terpisah dengan kerangka acuan, toleransi, serta waktu penilaian yang eksplisit.
+Tugas AirSimNH dibagi menjadi tiga kelompok. (1) Gerak primitif menguji translasi terarah, perubahan yaw, perubahan ketinggian, dan mempertahankan posisi. (2) Interaksi landmark menguji pendekatan ke landmark, melewati sisi kiri atau kanan yang diminta, mengorbit searah atau berlawanan arah jarum jam, dan bertahan pada jarak yang ditentukan. (3) Komposisi multilangkah menggabungkan dua atau lebih keterampilan tersebut dalam urutan instruksi, misalnya mendekati landmark, melewatinya dari sisi tertentu, lalu kembali ke titik awal.
 
-%-----------------------------------------------------------------------------%
-\section{Protokol Eksperimen, Log, dan Metrik}
-\label{sec:protokol_eksperimen}
-%-----------------------------------------------------------------------------%
-Sebelum pengujian VLM, konfigurasi GPT-5.6, Qwen3.6 35B-A3B dengan tag \texttt{qwen3.6:35b-a3b}, dan Gemini dikunci serta dicatat. Untuk Gemini, catatan juga memuat mode sesi Live API, modalitas \textit{streaming}, batas waktu pengumpulan respons pada setiap keputusan, serta aturan pemetaan pemanggilan fungsi atau teks ke respons mentah.
+Landmark visual dan penanda yang dapat ditempatkan pada adegan berfungsi sebagai jangkar perseptual, bukan sebagai satu-satunya definisi tugas. Identitas dan pose landmark tersedia bagi evaluator, sementara kebijakan menerima citra, instruksi, keadaan UAV, dan hitungan kemajuan terverifikasi. Adegan, kondisi awal, dan ambang geometris setiap intensi dicatat dalam manifest. Oklusi bangunan dan penghindaran rintangan kompleks belum termasuk dalam klaim eksperimen.
 
-Sebelum pengujian portabilitas VLA, konfigurasi CognitiveDrone, OpenVLA-7B yang diadaptasi untuk UAV, dan OpenPI $\pi_{0.5}$ yang diadaptasi untuk UAV dikunci serta dicatat. Catatan tersebut memuat asal \textit{checkpoint}, split dan versi trajektori adaptasi, skema atau tokenisasi aksi UAV, horizon keluaran, serta prosedur dekode. Untuk seluruh \textit{backend}, catatan juga memuat identitas versi atau rilis, penyedia dan jenis antarmuka, kapabilitas yang dideklarasikan, prapemrosesan gambar, resolusi efektif, \textit{prompt}, parameter dekode, \textit{runtime}, perangkat keras lokal, dan wilayah atau konfigurasi layanan apabila relevan. Seluruh \textit{backend} pada kondisi antarmuka bersama menggunakan episode, pengendali, batasan keselamatan, kebijakan coba-ulang, dan evaluator yang sama.
+Partisi AirSimNH dibangun dari episode lengkap, kondisi awal, kombinasi intensi, dan tata letak. Set pelatihan menyediakan episode untuk rollout GRPO; set pengembangan dipakai untuk memilih konfigurasi; set uji ditetapkan sebelum penyetelan akhir. Varian pengembangan v2 yang pernah digunakan tidak otomatis menjadi set uji bebas penyetelan. Pemeriksaan kinematik dipisahkan dari pemeriksaan visual; evaluasi akhir memakai rendering untuk menguji persepsi, geometri lintasan, serta tabrakan.
 
-Log per keputusan memuat identitas episode dan manifest, versi anotasi, \texttt{observation\_id}, respons mentah, hasil deserialisasi, aksi kanonis yang diusulkan, usulan peristiwa misi, keputusan gerbang, aksi aktual, keadaan UAV, usia pengamatan, waktu inferensi, waktu keputusan ujung-ke-ujung, dan alasan terminal. Untuk penambatan, log juga menyimpan target prediksi, target acuan, aturan pencocokan, hasil kecocokan instans, dan hasil predikat relasi. Dengan demikian, metrik agregat dapat dihitung ulang dari log mentah.
+\subsection{Demonstrasi untuk SFT}
+\label{subsec:data_sft}
+UAV-Flow-Sim menjadi sumber demonstrasi utama untuk M1 dan kontrol SFT lanjutan \citep{wang2025uavflow}. Data sumber menyediakan instruksi, pengamatan, dan trajektori penerbangan untuk keterampilan gerak serta interaksi landmark. Hanya episode pada partisi pelatihan yang digunakan untuk SFT dan kalibrasi antarmuka aksi. Data nyata UAV-Flow tidak dicampur ke pelatihan utama karena distribusi visual dan dinamika sensor berbeda; penggunaannya memerlukan eksperimen adaptasi domain tersendiri.
 
-Akurasi penambatan instans didefinisikan sebagai $A_{\mathrm{inst}}=N^{-1}\sum_{i=1}^{N}\mathbf{1}[p_i=g_i]$ pada semua peluang deklarasi target yang dievaluasi. Akurasi relasi dihitung terpisah pada peluang yang memuat predikat spasial. Tingkat keberhasilan misi adalah proporsi episode yang memenuhi seluruh kondisi terminal berhasil. Tingkat tabrakan adalah proporsi episode yang mengalami sedikitnya satu tabrakan; jumlah tabrakan per keputusan dilaporkan sebagai metrik tambahan. Tingkat aksi tidak valid adalah proporsi respons awal yang gagal diurai, sedangkan kegagalan setelah \textit{prompt} perbaikan dicatat terpisah. Tingkat intervensi keselamatan adalah proporsi aksi kanonis yang dipotong, diganti, atau ditolak. Efisiensi lintasan adalah rasio panjang lintasan referensi yang layak terhadap panjang lintasan aktual untuk episode berhasil, dengan lintasan referensi dibekukan oleh manifest. Latensi inferensi dan latensi ujung-ke-ujung dilaporkan sebagai median, persentil ke-95, dan distribusi per episode.
+Konversi data mengubah pose berurutan menjadi aksi relatif empat-dimensi $(\Delta x,\Delta y,\Delta z,\Delta\psi)$ dalam kerangka FRD yang digunakan DroneVL. Proses mencatat frekuensi sampel, satuan, transformasi koordinat, penanganan yaw melingkar, sinkronisasi citra, dan pemotongan potongan aksi. Episode yang gagal konversi, tidak tersinkron, atau tidak cocok dengan taksonomi intensi dikeluarkan dengan alasannya. Video sumber dan citra sensor tetap ditelusuri melalui identitas episode dan manifest.
 
-%-----------------------------------------------------------------------------%
-\section{Eksperimen Adaptasi LoRA dan GRPO}
+Demonstrasi oracle AirSimNH yang sudah tersedia merupakan bukti integrasi awal dan tidak menjadi data utama M1. Kontrol SFT lanjutan mengulang objektif pada partisi pelatihan UAV-Flow-Sim dengan anggaran pembaruan tambahan yang ditetapkan sebelumnya. Rollout GRPO dikumpulkan pada episode AirSimNH dari partisi pelatihan. Episode AirSimNH untuk pengembangan dan uji tidak diekspor ke pelatihan. Pengulangan trajektori deterministik tidak dihitung sebagai keragaman tambahan. OpenVLA dan $\pi_0$-FAST memakai sumber episode yang sama; potongan FAST tidak melintasi batas episode atau partisi.
+
+\subsection{Pengujian ID dan Generalisasi Kombinasi Instruksi}
+\label{subsec:split_generalisasi}
+Data UAV-Flow-Sim dipisahkan menurut episode sumber, sedangkan episode AirSimNH dipisahkan menurut kondisi awal, tata letak, dan kombinasi intensi. Sumber UAV-Flow-Sim hanya menyumbang demonstrasi pelatihan dan pengembangan; episode uji akhir seluruhnya berasal dari AirSimNH. Set AirSimNH pelatihan digunakan untuk rollout GRPO dan, jika ditetapkan, demonstrasi kontrol SFT. Set pengembangan digunakan untuk memilih hiperparameter dan checkpoint. Set uji ditetapkan sebelum penyetelan akhir.
+
+Pengujian ID memakai episode AirSimNH yang tidak dipakai dalam rollout, tetapi menggunakan keterampilan serta komposisi intensi yang terwakili saat pelatihan. Pengujian OOD utama menahan kombinasi keterampilan: setiap intensi primitif telah muncul dalam pelatihan, tetapi urutan gabungannya belum pernah digunakan. Variasi tata letak dan parafrasa bahasa diuji sebagai faktor terpisah jika manifest mendukungnya.
+
+Manifest mencatat intensi atomik, urutan, ungkapan instruksi, kondisi awal, tata letak, dan partisi sumber. Episode dan frame dari satu penerbangan tidak dibagi melintasi partisi. Klaim generalisasi komposisional hanya dibuat jika kombinasi uji benar-benar ditahan dari SFT, rollout GRPO, pemilihan hiperparameter, dan pemilihan checkpoint.
+
+\section{Pelatihan LoRA-SFT}
+\label{sec:lora_training}
+M1 akan dilatih menggunakan objektif Persamaan~\ref{eq:sft}. Loss hanya menghitung token aksi demonstrasi yang valid. Padding tidak masuk penyebut loss. Token instruksi dan keadaan menjadi konteks, bukan target aksi.
+
+Implementasi OpenVLA memasang LoRA pada modul perhatian yang ditentukan konfigurasi dan membekukan bobot dasar. Modul visual dijaga deterministik. Setiap parameter lain yang turut dilatih harus dicatat.
+
+Konfigurasi pengembangan OpenVLA memakai peringkat 32, $\alpha=64$, target \texttt{q\_proj}/\texttt{v\_proj}, dan dropout nol. Optimizer AdamW menggunakan laju pembelajaran $2\times10^{-4}$ dan batas norma gradien 1 selama 1.000 langkah. Implementasi mengambil satu sampel per langkah dengan pengambilan ulang. Konfigurasi ini belum membuktikan pelatihan penuh atau hiperparameter optimal.
+
+Konfigurasi akhir akan dipilih melalui set pengembangan. Catatannya mencakup presisi, akumulasi gradien, kuantisasi jika digunakan, anggaran, dan \textit{seed}. Seed adalah nilai awal pembangkit bilangan acak. Aturan pemilihan checkpoint akan ditetapkan sebelum pengujian akhir.
+
+SFT $\pi_0$-FAST akan memakai target token potongan aksi dari demonstrasi UAV yang sama. Modul LoRA, parameter proyeksi yang dilatih penuh jika ada, presisi, panjang token maksimum, dan optimizer akan ditetapkan khusus model. Resep OpenVLA tidak langsung diterapkan pada FAST. RLinf mendokumentasikan GRPO dengan LoRA untuk $\pi_0$-FAST \citep{rlinf2026pi0fast}. Integrasi dan pelatihan UAV lokalnya masih perlu dilakukan.
+
+Kontrol SFT lanjutan akan dimulai dari M1 terpilih pada setiap model. Kontrol ini hanya memakai demonstrasi pelatihan yang diizinkan. Anggaran tambahan ditetapkan sebelum hasil uji dilihat. Asal checkpoint dan implementasi kontrol perlu diverifikasi sebelum perbandingan utama. Perbedaan akses interaksi antara SFT dan GRPO tetap dilaporkan.
+
+\section{GRPO setelah M1}
 \label{sec:lora_grpo_experiment}
-%-----------------------------------------------------------------------------%
-LoRA dan GRPO merupakan tujuan utama penelitian pada OpenVLA-7B yang diadaptasi untuk UAV. Tiga kondisi dibandingkan: model dasar OpenVLA-7B dengan tokenisasi aksi UAV yang ditetapkan (M0); M0 dengan LoRA terawasi menggunakan trajektori CoSyS-AirSim pada split pelatihan (M1); dan M1 yang dilanjutkan GRPO menggunakan \textit{rollout} CoSyS-AirSim (M2). Data pelatihan hanya berasal dari split pelatihan; split pengembangan digunakan untuk memilih hiperparameter; split pengujian yang telah dibekukan tidak digunakan untuk penyetelan maupun \textit{rollout}.
+\subsection{Pengumpulan Rollout dan Penghargaan}
+M2 dirancang untuk melanjutkan adapter LoRA M1 pada model yang sama. Salinan LoRA M1 dibekukan sebagai kebijakan acuan $\pi_{\mathrm{ref}}$. Kebijakan pengumpul $\pi_{\mathrm{old}}$ dibuat tetap selama pengumpulan $G$ rollout dalam satu kelompok. Semua rollout kelompok memakai episode dan kondisi awal yang sama. Pembaruan hanya mengubah parameter LoRA kebijakan, bukan bobot dasar atau acuan.
 
-LoRA dan GRPO dibatasi pada VLA OpenVLA-7B, bukan diterapkan pada seluruh model dalam penelitian. Tujuannya adalah mengisolasi pengaruh adaptasi kebijakan aksi UAV melalui perbandingan M0--M1--M2 dengan data, pengendali, episode, dan metrik yang sama. OpenVLA-7B dipilih karena keluarannya berupa token aksi diskret dan prosedur LoRA tersedia untuk tugas maupun perwujudan robot baru \citep{kim2024openvla}; kondisi ini memungkinkan log-probabilitas token aksi dicatat pada setiap \textit{rollout} untuk perhitungan GRPO. Kelompok VLM tetap dievaluasi sebagai perencana semantik melalui kontrak pengamatan dan aksi yang sama. Penerapan LoRA atau GRPO pada VLM akan menambahkan pertanyaan penelitian lain tentang adaptasi perencana, sekaligus mengaburkan apakah perubahan hasil berasal dari model perencana, kebijakan aksi, atau lapisan adaptor.
+Simulator dijeda selama inferensi. Setelah inferensi, sistem menjalankan aksi yang lolos gerbang keselamatan. Kandidat dalam satu kelompok memakai pembatasan token dan temperatur pengambilan sampel yang sama. Probabilitas lama direkam saat token disampel. Probabilitas kebijakan saat ini dan acuan dihitung pada token, konteks, himpunan token, dan temperatur yang sesuai.
 
-CognitiveDrone dan OpenPI $\pi_{0.5}$ tetap digunakan pada eksperimen portabilitas VLA, tetapi bukan sebagai kondisi LoRA+GRPO. CognitiveDrone menjadi pembanding kebijakan khusus UAV yang sudah tersedia. OpenPI $\pi_{0.5}$ dapat diadaptasi terhadap trajektori UAV sesuai prosedur pelatihannya sendiri, tetapi keluaran \textit{flow-matching}-nya berupa potongan aksi kontinu \citep{physicalintelligence2025openpi}. Karena representasi tersebut tidak serta-merta menyediakan rasio probabilitas kebijakan yang diperlukan GRPO, memasukkannya ke M0--M1--M2 akan menghasilkan perbandingan metode optimisasi yang tidak sepadan. Dengan pembatasan ini, eksperimen portabilitas menjawab kesesuaian antarmuka VLA, sedangkan eksperimen OpenVLA-7B menjawab dampak LoRA dan GRPO secara terisolasi.
+Jejak FAST akan mencakup token akhir aksi jika token tersebut disampel sebagai bagian distribusi kebijakan. Token konteks dan padding tidak masuk loss. Teacher forcing harus mereproduksi probabilitas sesuai tokenizer, pembatasan token, temperatur, dan aturan akhir saat rollout. Trajektori gagal tidak diganti diam-diam dengan trajektori berhasil.
 
-Manifest pelatihan menetapkan data dan versi \textit{prompt}, tokenisasi serta skema aksi UAV, lapisan dan peringkat LoRA, kuantisasi, perangkat keras, anggaran token, jumlah \textit{rollout}, ukuran kelompok GRPO, kebijakan acuan, dan \textit{seed}. Pada M2, sejumlah \textit{rollout} bertitik awal sama disampel dari token aksi OpenVLA, log-probabilitas kebijakan lama disimpan, dan penghargaan relatif kelompok dihitung dari keberhasilan misi, kemajuan subtujuan, keselamatan, kepatuhan format aksi, serta penalti aksi tidak valid. Bobot komponen serta setiap ablasi dibekukan sebelum pelatihan. Ketiga kondisi dievaluasi dengan manifest episode, pengendali, batas keselamatan, dan metrik yang sama, sehingga perubahan hasil dapat ditafsirkan sebagai efek LoRA dan GRPO pada OpenVLA-7B UAV yang diuji. OpenPI $\pi_{0.5}$ tidak dimasukkan ke klaim GRPO; ia hanya dibandingkan pada eksperimen portabilitas VLA setelah adaptasi UAVnya sendiri.
+Penghargaan menilai penyelesaian misi dan kesesuaian intensi, serta memberi penalti pada tabrakan, aksi tidak valid, dan intervensi keselamatan. Penghargaan trajektori ke-$i$ dinyatakan sebagai berikut.
+\eqcaption{R_i=w_s S_i+w_p P_i+w_I I_i-w_c C_i-w_v V_i-w_g J_i}{eq:reward}{Penghargaan trajektori GRPO berbasis intensi.}
+Pada Persamaan~\ref{eq:reward}, $S_i$ menyatakan keberhasilan misi, yaitu pencapaian tujuan beserta seluruh syarat intensi wajib. $P_i$ adalah proporsi subtujuan berurutan yang selesai. $I_i\in[0,1]$ adalah proporsi predikat intensi yang dipenuhi sepanjang trajektori, seperti melewati sisi yang diminta, mencapai arah orbit yang benar, atau bertahan dalam rentang jarak. $C_i$ menandai tabrakan, $V_i$ menyatakan proporsi aksi tidak valid, dan $J_i$ menyatakan proporsi intervensi keselamatan. Evaluator menghitung predikat dari pose UAV dan landmark acuan; ambang geometris dicatat sebelum uji. Semua bobot tidak negatif dan ditetapkan melalui pengembangan. Bobot pengembangan lama belum mencakup $I_i$ dan tidak dianggap sebagai konfigurasi final.
+
+Penyebut setiap proporsi dan penanganan episode tanpa keputusan akan ditetapkan bersama evaluator. Bobot penghargaan tidak disetel menggunakan set uji. Trajektori yang gagal akibat keputusan kebijakan tetap disimpan dan diberi penghargaan. Kelompok GRPO berisi rollout kebijakan secara daring; demonstrasi ahli tidak disisipkan sebagai anggota kelompok agar kondisi ini tetap berbeda dari EG-GRPO.
+
+Kegagalan infrastruktur, interupsi, atau kesalahan pembersihan akan menghentikan pengumpulan untuk diperiksa. Kejadian tersebut tidak diberi label kegagalan navigasi untuk pembaruan kebijakan. Biaya percobaan yang tidak menghasilkan pembaruan tetap dicatat.
+
+\subsection{Objektif Token dan Pembaruan Parameter}
+Pembaruan GRPO membandingkan probabilitas token kebijakan saat ini dengan probabilitas saat pengumpulan data. Token aksi dinyatakan sebagai $y_{i,t,j}$ dan konteksnya sebagai $h_{i,t,j}$. Rasio kebijakan dihitung sebagai berikut.
+\eqcaption{r_{i,t,j}(\theta)=\exp\!\left(\log\pi_\theta(y_{i,t,j}\mid h_{i,t,j})-\log\pi_{\mathrm{old}}(y_{i,t,j}\mid h_{i,t,j})\right)}{eq:ratio}{Rasio probabilitas token aksi.}
+Pada Persamaan~\ref{eq:ratio}, rasio meningkat ketika kebijakan saat ini memberi probabilitas lebih tinggi pada token tersampel. Rasio tersebut digabungkan dengan keunggulan trajektori pada Persamaan~\ref{eq:advantage}. Rancangan objektif untuk kedua model adalah sebagai berikut.
+\eqcaption{\mathcal L_{\mathrm{GRPO}}=-\frac{1}{G}\sum_{i=1}^{G}\frac{1}{T_i}\sum_{t=1}^{T_i}\frac{1}{K_{b,i,t}}\sum_{j=1}^{K_{b,i,t}}\left[\min\!\left(r_{i,t,j}\hat A_i,\operatorname{clip}(r_{i,t,j},1-\epsilon_c,1+\epsilon_c)\hat A_i\right)-\beta d_{i,t,j}\right]}{eq:grpo}{Objektif GRPO dengan bobot rata per trajektori.}
+Persamaan~\ref{eq:grpo} merata-ratakan kontribusi token dalam keputusan, lalu keputusan dalam trajektori, dan akhirnya trajektori dalam kelompok. $K_{b,i,t}$ menyatakan jumlah token aksi valid pada keputusan ke-$t$. Nilainya empat pada OpenVLA dan mengikuti keluaran FAST pada $\pi_0$-FAST. $T_i$ menyatakan jumlah keputusan. Keunggulan $\hat A_i$ diberikan kepada token aksi sepanjang trajektori.
+
+Parameter $\epsilon_c$ membatasi rasio pembaruan, sedangkan $\beta$ mengatur penalti terhadap acuan M1. Implementasi memakai estimator sampel $d=\exp(\ell_{\mathrm{ref}}-\ell_\theta)-(\ell_{\mathrm{ref}}-\ell_\theta)-1$. Simbol $\ell$ menyatakan log-probabilitas token. Estimator ini bukan perhitungan penuh divergensi Kullback--Leibler (KL) atas seluruh kosakata. Acuan M1 tetap dibedakan dari kebijakan pengumpul yang berubah antarkelompok.
+
+Konfigurasi pengembangan OpenVLA memakai 50 kelompok dengan empat rollout per kelompok. Temperatur bernilai 1, batas kliping 0,2, dan $\beta=0{,}04$. AdamW memakai laju pembelajaran $10^{-5}$ dan batas norma gradien 1.
+
+Satu kelompok informatif menghasilkan satu pembaruan setelah akumulasi loss dengan bobot rata per trajektori. Kelompok dengan seluruh keunggulan mendekati nol dilewati dan dicatat. Implementasi tidak menyimpan M2 sebagai hasil terlatih jika tidak ada kelompok informatif yang menghasilkan pembaruan. Anggaran akhir, seed pelatihan, dan aturan pemilihan checkpoint masih perlu ditetapkan.
+
+Konfigurasi $\pi_0$-FAST akan diuji dan ditetapkan tersendiri. Konfigurasi ini mencakup pengambilan sampel, himpunan token yang diizinkan, penalti acuan, dan anggaran pelatihan. Nilai pengembangan OpenVLA tidak dilaporkan sebagai konfigurasi FAST yang sudah dijalankan.
+
+Log merekam token tersampel, aksi hasil dekode $a_t$, dan aksi aktual $\tilde a_t$ setelah gerbang keselamatan. Probabilitas kebijakan melekat pada token tersampel. Transisi dan penghargaan mengikuti aksi aktual. Karena itu, evaluasi menilai kebijakan di dalam sistem dengan gerbang keselamatan tetap. Intervensi keselamatan tetap disertakan dalam analisis.
+
+\begin{algorithm}[htbp]
+\caption{Rancangan pembaruan GRPO dari M1}
+\label{alg:grpo}
+\small
+\begin{algorithmic}[1]
+\Require Model $b$, M1 milik model $b$, partisi pelatihan, gerbang keselamatan tetap, konfigurasi pengambilan sampel dan penghargaan
+\State Inisialisasi LoRA kebijakan dari M1; bekukan acuan M1
+\For{setiap kelompok episode pelatihan}
+    \State Bekukan versi pengumpul data dan pulihkan kondisi awal yang sama
+    \State Kumpulkan $G$ rollout stokastik beserta konteks, token, dan log-probabilitas
+    \State Periksa integritas infrastruktur; hitung seluruh komponen penghargaan
+    \State Hitung keunggulan relatif kelompok
+    \If{semua keunggulan mendekati nol}
+        \State Catat kelompok tanpa sinyal; lanjutkan kelompok berikutnya
+    \Else
+        \State Hitung loss token terhadap kebijakan lama dan acuan M1
+        \State Perbarui hanya parameter LoRA kebijakan
+    \EndIf
+\EndFor
+\State Simpan asal checkpoint M1, konfigurasi, pembaruan, dan seluruh biaya rollout
+\end{algorithmic}
+\end{algorithm}
+Algoritme~\ref{alg:grpo} menunjukkan urutan pengumpulan data dan pembaruan untuk satu model. M1 yang menjadi induk dan acuan harus berasal dari model yang sama. Algoritme dijalankan terpisah untuk OpenVLA dan $\pi_0$-FAST.
+
+\section{Eksekusi, Keselamatan, dan Pencatatan}
+\label{sec:rancangan_dronevl}
+DroneVL memisahkan pengambilan sensor, pembungkus model, pengurai, pengelola misi, gerbang keselamatan, pengendali, dan evaluator. Kontrak sensor dan aksi menetapkan versi, satuan, kerangka koordinat, waktu kedaluwarsa, serta identitas keputusan.
+
+Gerbang keselamatan memeriksa nilai berhingga, batas gerak, yaw, ketinggian, jarak bebas, dan usia sensor. Komponen ini juga memeriksa batas wilayah atau \textit{geofence}. Setiap penerimaan, pemotongan, penggantian, atau penolakan aksi dicatat beserta alasannya. Oracle tidak menggantikan aksi model ketika inferensi gagal.
+
+Log keputusan menyimpan RGB, konteks efektif, identitas model, tokenizer, token, dan log-probabilitas. Log juga menyimpan aksi sebelum serta sesudah gerbang keselamatan, keadaan aktual, hasil inspeksi, alasan terminal, dan latensi. Latensi inferensi dipisahkan dari latensi ujung-ke-ujung keputusan.
+
+Manifest menyimpan versi adegan, pose awal, instruksi, target evaluator, anggaran waktu dan keputusan, serta aturan terminal. Seed dan hash kode serta konfigurasi juga dicatat. Frame pelatihan, respons model, dan tabel hasil harus dapat ditelusuri ke episode asal.
+
+\section{Protokol Evaluasi dan Analisis}
+\label{sec:protokol_eksperimen}
+\subsection{Ukuran Hasil}
+Satuan analisis utama adalah episode misi. Tingkat keberhasilan dihitung sebagai jumlah episode yang memenuhi tujuan dan seluruh predikat intensi wajib dibagi seluruh episode uji yang sah. Aturan dapat mencakup urutan, sisi lintasan relatif terhadap landmark, arah orbit, rentang pendekatan, toleransi posisi, durasi bertahan, serta kembali jika diwajibkan. Kegagalan infrastruktur ditangani terpisah sesuai protokol yang ditetapkan sebelum pengujian.
+
+Hasil akan dilaporkan per keluarga misi dan sebagai agregat dengan bobot keluarga yang ditetapkan terlebih dahulu. Untuk setiap model, selisih utama adalah $\Delta_b=\mathrm{SR}(M_{2,b})-\mathrm{SR}(M_{1,b})$. Simbol SR (\textit{success rate}) menyatakan tingkat keberhasilan. Selisih dilaporkan dalam poin persentase beserta interval ketidakpastiannya. Perbandingan M2 dengan kontrol SFT lanjutan dilaporkan terpisah untuk setiap model.
+
+Penyebut aksi tidak valid dan intervensi keselamatan akan dilaporkan pada dua tingkat. Tingkat pertama adalah keputusan model. Tingkat kedua adalah gerak fisik empat-dimensi yang diajukan ke gerbang keselamatan. Token FAST bukan satuan intervensi keselamatan. Potongan berisi beberapa gerak tidak dihitung sebagai satu gerak tanpa penjelasan.
+
+Skor kesesuaian intensi (\textit{intent adherence score}) dilaporkan sebagai rata-rata $I_i$ dan diuraikan per jenis intensi serta keluarga misi. Ukuran sekunder lain mencakup proporsi episode bertabrakan, pelanggaran batas, aksi tidak valid, intervensi keselamatan, dan penyelesaian subtujuan. Waktu misi, panjang lintasan, serta latensi median dan persentil ke-95 juga dilaporkan.
+
+Efisiensi lintasan memakai lintasan referensi yang layak dan telah ditetapkan. Efisiensi pada episode berhasil selalu ditampilkan bersama tingkat keberhasilan karena kegagalan tidak masuk perhitungan bersyarat tersebut. Jika referensi mendukungnya, efisiensi berbobot keberhasilan memasukkan episode gagal sebagai nol. Kegagalan pada episode sulit tidak digunakan untuk menyimpulkan peningkatan efisiensi.
+
+Predikat intensi dilaporkan terpisah agar keberhasilan mencapai sasaran tidak menutupi kegagalan mengikuti cara terbang yang diminta. Hasil dipilah menjadi gerak primitif, interaksi landmark, dan komposisi multilangkah. Penilaian sisi lintasan, arah orbit, posisi relatif, dan urutan subtujuan memakai toleransi evaluator yang sama antarkondisi.
+
+\subsection{Pengulangan dan Ketidakpastian}
+Episode uji, kondisi awal, anggaran fisik, pengendali, dan gerbang keselamatan dipasangkan antarkondisi. Aturan dekode dibuat tetap antartahapan dalam model yang sama. Jumlah token tidak disetarakan antarmodel.
+
+M1 akan dilatih dengan beberapa seed independen pada setiap model. M2 dan kontrol SFT lanjutan dipasangkan pada checkpoint M1 masing-masing. Seed pengambilan sampel rollout dibedakan dari seed pelatihan dan episode uji. Evaluasi akan memakai dekode deterministik yang telah ditetapkan, kecuali pengujian stokastik dilaporkan sebagai kondisi terpisah.
+
+Jumlah seed dan episode akhir akan ditentukan sebelum set uji dibuka. Penentuannya memakai uji pendahuluan pada set pengembangan, target lebar interval, dan anggaran. Interval selisih hasil akan dihitung melalui pengambilan sampel ulang berpasangan yang mempertahankan pasangan kondisi.
+
+Jika inferensi mencakup seed pelatihan dan kelompok kombinasi instruksi, pengambilan sampel ulang akan dilakukan secara hierarkis pada tingkat tersebut. Frame dan keputusan dalam satu penerbangan tidak dihitung sebagai pengulangan independen. Hasil per seed, jumlah unit independen, dan interval ketidakpastian akan dilaporkan bersama.
+
+\subsection{Kriteria Interpretasi dan Biaya}
+Hasil ID dan OOD akan dinilai terpisah untuk OpenVLA serta $\pi_0$-FAST. Perbedaan $\Delta_b$ akan dianalisis dengan interval berpasangan pada episode yang sama. Model dengan tingkat keberhasilan lebih tinggi belum tentu memperoleh manfaat GRPO lebih besar. Perbedaan antarmodel juga mencakup bobot pralatih dan pemroses masukan, sehingga tidak mengisolasi pengaruh tokenisasi.
+
+Peningkatan penghargaan pelatihan tanpa peningkatan tingkat keberhasilan uji tidak mendukung hipotesis utama. Jika tingkat keberhasilan meningkat bersama tabrakan atau intervensi keselamatan, keduanya dilaporkan sebagai pertukaran manfaat dan risiko. Klaim tanpa penurunan keselamatan memerlukan interval dan batas praktis yang ditetapkan sebelumnya. Perbedaan yang tidak signifikan saja belum cukup untuk klaim tersebut.
+
+Kurva pembelajaran akan menampilkan tingkat keberhasilan pengembangan terhadap langkah lingkungan dan waktu GPU. Proporsi kelompok tanpa variasi penghargaan juga dicatat. Biaya mencakup pengumpulan, rollout gagal, inferensi acuan, pembaruan optimizer, dan kebutuhan memori.
+
+Data demonstrasi tambahan pada kontrol SFT lanjutan harus dilaporkan. GRPO tidak menerima demonstrasi ahli di dalam kelompok; penambahan panduan ahli akan menjadi kondisi metode terpisah dan bukan bagian eksperimen utama.
+
+\section{Parameter yang Belum Ditetapkan}
+\label{sec:parameter_terbuka}
+Tabel~\ref{tab:parameter_terbuka} memuat informasi yang belum tersedia untuk eksperimen utama. Nilainya akan diisi dari manifest dan pelaksanaan yang nyata.
+
+\begin{table}[htbp]
+\centering
+\caption{Informasi yang akan ditetapkan sebelum eksperimen utama.}
+\label{tab:parameter_terbuka}
+\small
+\begin{tabularx}{\linewidth}{|p{4cm}|X|}
+\hline
+\textbf{Komponen} & \textbf{Informasi yang belum final} \\
+\hline
+Model kedua & Identitas dan revisi checkpoint $\pi_0$-FAST, pemroses masukan UAV, tokenizer dan potongan aksi, pembatasan token, serta validasi probabilitas token dan rollout lokal. \\
+\hline
+Data dan komposisi & Versi serta partisi UAV-Flow-Sim, jumlah demonstrasi setelah konversi, aturan peta aksi FRD, daftar intensi dan kombinasi instruksi, manifest AirSimNH ID/OOD, versi aset dan pemeriksaan visual. \\
+\hline
+Pelatihan & Jumlah seed, modul LoRA, anggaran akhir SFT/GRPO/SFT lanjutan, presisi, dan pemilihan checkpoint setiap model. \\
+\hline
+Eksekusi & Horizon/pemetaan aksi, batas keselamatan dan usia sensor, ambang geometri tiap predikat intensi, anggaran episode. \\
+\hline
+Analisis & Jumlah unit uji, bobot agregasi keluarga, target presisi interval dan aturan penanganan kegagalan infrastruktur. \\
+\hline
+\end{tabularx}
+\end{table}
+Tabel~\ref{tab:parameter_terbuka} membatasi rincian yang dapat dinyatakan sebagai konfigurasi akhir. Sebelum data tersebut tersedia, angka pengembangan tetap dilaporkan sebagai konfigurasi pengembangan.

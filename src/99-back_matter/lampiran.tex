@@ -1,58 +1,51 @@
-%---------------------------------------------------------------------%
-\addChapter{Lampiran 1 - Kode Program}
-\chapter*{Lampiran 1 - Kode Program}
-%---------------------------------------------------------------------%
-
-\section*{Lampiran 1.1 Contoh Penulisan Kode Program (\texttt{contoh.py})}
-\addcontentsline{toc}{section}{Lampiran 1.1 Contoh Penulisan Kode Program (contoh.py)}
-
-Lampiran digunakan untuk memuat berkas pendukung seperti kode program, data
-mentah, atau dokumen tambahan. Potongan kode ditulis menggunakan lingkungan
-\texttt{lstlisting} dengan gaya \texttt{mystyle} yang telah didefinisikan pada
-\texttt{thesis.tex}.
-
-\begin{lstlisting}[
-    style=mystyle,
-    language=Python,
-]
-def main():
-    """Ganti isi lampiran ini dengan kode program yang sebenarnya."""
-    data = [1, 2, 3, 4, 5]
-    total = sum(data)
-    print("Jumlah data:", len(data))
-    print("Total nilai:", total)
-
-
-if __name__ == "__main__":
-    main()
-\end{lstlisting}
-
-%---------------------------------------------------------------------%
-\section*{Lampiran 1.2 Contoh Lampiran Tabel}
-\addcontentsline{toc}{section}{Lampiran 1.2 Contoh Lampiran Tabel}
-
-Tabel pendukung yang terlalu panjang untuk dimuat pada batang tubuh laporan
-dapat diletakkan pada lampiran.
+\chapter{Sumber Bukti dan Kelengkapan Reproduksi}
+\label{app:provenance}
+\section{Repositori dan Bukti Pengembangan}
+Implementasi eksperimen ditinjau pada repositori lokal \texttt{\detokenize{~/ws/robotics/thesis}} pada 6 November 2026. Repositori naskah terpisah dari repositori eksperimen. Tabel~\ref{tab:provenance} menunjukkan sumber catatan pengembangan yang digunakan pada Bab~IV.
 
 \begin{table}[htbp]
-    \centering
-    \addtocounter{table}{-1}
-    \caption{Contoh tabel pada lampiran}
-    \label{tab:contoh_lampiran}
-    \small
-    \setlength{\tabcolsep}{4pt}
-    \renewcommand{\arraystretch}{1.15}
-    \begin{tabularx}{\textwidth}{
-        >{\centering\arraybackslash}p{2cm}
-        >{\raggedright\arraybackslash}p{3cm}
-        >{\raggedright\arraybackslash}X
-    }
-        \toprule
-        \textbf{No.} & \textbf{Parameter} & \textbf{Keterangan} \\
-        \midrule
-        1 & Parameter A & Keterangan parameter pertama. \\
-        2 & Parameter B & Keterangan parameter kedua. \\
-        3 & Parameter C & Keterangan parameter ketiga. \\
-        \bottomrule
-    \end{tabularx}
+\centering
+\caption{Sumber lokal bukti pengembangan.}
+\label{tab:provenance}
+\small
+\begin{tabularx}{\linewidth}{|p{3cm}|X|}
+\hline
+\textbf{Dokumen} & \textbf{Isi dan batas bukti} \\
+\hline
+Uji inferensi 13 Oktober & \path{docs/runpod-native-inference-2026-10-13.md}: inferensi statis dan satu pembaruan LoRA pada enam aksi pengembangan. \\
+\hline
+Uji misi 3 November & \path{docs/model-mission-trials-2026-11-03.md}: uji pengembangan M0 dan Qwen; tidak menjadi hasil eksperimen utama. \\
+\hline
+Arena v2 & \path{docs/airsimnh-complex-arena.md}: 15 episode pengembangan, pemeriksaan oracle kinematik, lima episode pelatihan berender dan 42 sampel awal. \\
+\hline
+Keluaran model & \path{docs/live-model-outputs.md}: perbedaan token model dan pembungkus aksi; batas kesiapan checkpoint. \\
+\hline
+\end{tabularx}
 \end{table}
+Dokumen dalam Tabel~\ref{tab:provenance} merupakan catatan pengembangan. Dokumen tersebut tidak menggantikan log mentah atau publikasi eksternal. Setiap angka eksperimen akhir harus dapat ditelusuri ke manifest dan log pelaksanaannya.
+
+\section{Berkas Implementasi yang Mendasari Metode}
+Normalisasi dan tokenisasi OpenVLA berada pada \path{src/dronevl/adaptation/tokenizer.py}. Serialisasi konteks, pembatasan token, dan perhitungan probabilitas berada pada \path{src/dronevl/adaptation/model.py}.
+
+Prosedur SFT dan GRPO berada pada \path{src/dronevl/adaptation/training.py}. Fungsi penghargaan dan loss kelompok berada pada \path{src/dronevl/adaptation/grpo.py}. Konfigurasi pengembangan tercatat pada \path{configs/experiments/openvla-lora.json} dan \path{configs/experiments/openvla-grpo.json}.
+
+Semua path tersebut relatif terhadap repositori eksperimen. Revisi kode dan hash akhir masih perlu dicatat pada realisasi eksperimen utama.
+
+\section{Rencana Integrasi $\pi_0$-FAST}
+Integrasi $\pi_0$-FAST belum memiliki bukti UAV lokal pada revisi ini. Konfigurasi yang perlu disiapkan mencakup identitas checkpoint, pemroses masukan, tokenizer FAST, normalisasi, dan modul LoRA. Konversi episode menjadi potongan empat-dimensi serta horizon prediksi dan eksekusi juga perlu ditetapkan.
+
+Setiap potongan aksi harus dapat ditelusuri ke episode pelatihan dan tidak melintasi batas partisi. Probabilitas teacher forcing perlu diverifikasi terhadap jejak pengambilan sampel. Verifikasi memakai himpunan token, temperatur, dan token akhir yang sama sebelum rollout digunakan untuk GRPO.
+
+Checkpoint manipulasi atau contoh LIBERO hanya menjadi titik awal implementasi. Keduanya tidak disebut sebagai checkpoint UAV. Catatan inferensi $\pi_{0.5}$ juga tidak dianggap sebagai uji $\pi_0$-FAST. Nama berkas lokal dan perintah reproduksi akhir akan ditambahkan setelah implementasi tersedia.
+
+\section{Manifest Reproduksi Eksperimen Utama}
+Paket reproduksi akan disusun untuk setiap model dan kondisi. Paket memuat identitas serta revisi bobot dasar dan pemroses masukan. Hash tokenizer, data kalibrasi, checkpoint induk, dan bobot LoRA juga disertakan.
+
+Catatan pelatihan akan memuat templat konteks persis, parameter terlatih, optimizer, dan konfigurasi pengambilan sampel. Seed pelatihan, rollout, dan evaluasi dicatat terpisah. Manifest episode memuat versi aset, kondisi awal, kombinasi instruksi, aturan inspeksi, geofence, horizon, dan anggaran.
+
+Daftar partisi akan mencakup episode lengkap dan aturan pengelompokan untuk memeriksa kebocoran frame atau kombinasi instruksi. Artefak pelatihan memuat kurva loss, evaluasi pengembangan, aturan pemilihan checkpoint, dan penghargaan seluruh kelompok. Biaya rollout yang tidak menghasilkan pembaruan tetap disimpan.
+
+Artefak uji akan memuat RGB, log keputusan, token, aksi usulan dan aktual, serta alasan intervensi keselamatan. Hasil evaluator, video, dan tabel per episode disertakan. Tabel dihitung dari log agar hasil dapat diperiksa ulang.
+
+\section{Informasi yang Belum Tersedia}
+Integrasi UAV $\pi_0$-FAST dan manifest akhir belum tersedia. Jumlah seed, episode uji, serta konfigurasi kontrol SFT lanjutan juga belum ditetapkan. Hasil pelatihan penuh M1 dan M2 beserta tabel ketidakpastiannya akan ditambahkan setelah eksperimen selesai dan artefaknya diverifikasi.

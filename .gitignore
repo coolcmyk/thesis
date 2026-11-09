@@ -19,3 +19,6 @@ _minted-*/
 
 # Python bytecode cache.
 __pycache__/
+
+# Local thesis writing rules.
+/RULES.md

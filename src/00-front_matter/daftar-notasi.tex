@@ -1,17 +1,23 @@
-% isi file: daftar-notasi.tex
-
 \chapter*{DAFTAR NOTASI}
 \addcontentsline{toc}{chapter}{DAFTAR NOTASI}
-
-\begin{longtable}{p{2.5cm} p{\dimexpr\textwidth-2.5cm-2\tabcolsep\relax}}
-    % Anda bisa menambahkan header jika mau
-    % \textbf{Notasi} & \textbf{Keterangan} \\
-    % \hline
-    % \endhead
-
-    $g$ & Konstanta percepatan gravitasi (9.8 m/s$^2$) \\
-    $v_0$ & Kecepatan awal benda \\
-    $\alpha$ & Koefisien alpha \\
-    $\Sigma$ & Notasi untuk penjumlahan (sigma) \\
-
+\begin{longtable}{p{2.5cm} p{\dimexpr\textwidth-2.5cm-4\tabcolsep\relax}}
+$s_t,h_t$ & Keadaan simulator dan konteks yang tersedia bagi kebijakan. \\
+$I_t,\mathcal I$ & Citra RGB dan instruksi bahasa. \\
+$q_t,m_t$ & Keadaan UAV dan hitungan kemajuan terverifikasi. \\
+$a_t,\tilde a_t$ & Aksi usulan dan aksi aktual setelah gerbang keselamatan. \\
+$b$ & Identitas keluarga model OpenVLA atau $\pi_0$-FAST. \\
+$H_{\mathrm{pred},b},H_{\mathrm{exec},b}$ & Horizon prediksi dan horizon aksi yang benar-benar dieksekusi. \\
+$\Delta_b$ & Selisih tingkat keberhasilan M2 terhadap M1 pada model $b$. \\
+$\tau,T_i$ & Trajektori episode dan jumlah keputusan trajektori ke-$i$. \\
+$\pi_\theta$ & Kebijakan dengan parameter yang dioptimalkan. \\
+$\pi_{\mathrm{old}}$ & Kebijakan yang mengumpulkan kelompok rollout saat ini. \\
+$\pi_{\mathrm{ref}}$ & Kebijakan acuan M1 yang dibekukan. \\
+$W_0,B,A$ & Bobot dasar dan matriks pembaruan LoRA. \\
+$G,K_{b,i,t}$ & Ukuran kelompok rollout dan jumlah token aksi valid menurut model, trajektori, dan keputusan. \\
+$R_i,\bar R,\sigma_R$ & Penghargaan trajektori, rata-rata dan simpangan baku kelompok. \\
+$\hat A_i$ & Keunggulan relatif trajektori dalam kelompok. \\
+$r_{i,t,j}$ & Rasio probabilitas token kebijakan saat ini terhadap pengumpul. \\
+$\epsilon_c,\beta$ & Batas kliping dan bobot penalti acuan GRPO. \\
+$\varepsilon_A$ & Konstanta stabilisasi normalisasi keunggulan. \\
+$S_i,P_i,C_i,V_i,J_i$ & Keberhasilan, kemajuan, tabrakan, aksi tidak valid, dan intervensi keselamatan. \\
 \end{longtable}
